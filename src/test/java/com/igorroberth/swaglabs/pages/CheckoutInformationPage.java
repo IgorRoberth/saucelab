@@ -2,6 +2,7 @@ package com.igorroberth.swaglabs.pages;
 
 import com.igorroberth.swaglabs.components.PageTitle;
 import com.igorroberth.swaglabs.data.Customer;
+import io.qameta.allure.Step;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 
@@ -31,18 +32,21 @@ public class CheckoutInformationPage {
         this.errorMessage = page.getByTestId("error");
     }
 
+    @Step("Avançar com os dados do comprador")
     public CheckoutOverviewPage continueAs(Customer customer) {
         fillCustomer(customer);
         continueButton.click();
         return new CheckoutOverviewPage(page);
     }
 
+    @Step("Tentar avançar com os dados do comprador")
     public CheckoutInformationPage continueExpectingFailure(Customer customer) {
         fillCustomer(customer);
         continueButton.click();
         return this;
     }
 
+    @Step("Cancelar e voltar ao carrinho")
     public CartPage cancel() {
         cancelButton.click();
         return new CartPage(page);

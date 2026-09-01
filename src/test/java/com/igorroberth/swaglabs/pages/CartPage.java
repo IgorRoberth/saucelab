@@ -2,6 +2,7 @@ package com.igorroberth.swaglabs.pages;
 
 import com.igorroberth.swaglabs.components.PageTitle;
 import com.igorroberth.swaglabs.data.Product;
+import io.qameta.allure.Step;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
@@ -29,17 +30,20 @@ public class CartPage {
         this.checkoutButton = page.getByTestId("checkout");
     }
 
+    @Step("Remover {0} dentro do carrinho")
     public CartPage removeItem(Product product) {
         itemRow(product).getByRole(AriaRole.BUTTON,
                 new Locator.GetByRoleOptions().setName("Remove")).click();
         return this;
     }
 
+    @Step("Iniciar o checkout")
     public CheckoutInformationPage checkout() {
         checkoutButton.click();
         return new CheckoutInformationPage(page);
     }
 
+    @Step("Voltar às compras")
     public InventoryPage continueShopping() {
         continueShoppingButton.click();
         return new InventoryPage(page);

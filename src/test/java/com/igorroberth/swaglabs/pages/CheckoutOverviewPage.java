@@ -1,6 +1,7 @@
 package com.igorroberth.swaglabs.pages;
 
 import com.igorroberth.swaglabs.components.PageTitle;
+import io.qameta.allure.Step;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 
@@ -32,11 +33,13 @@ public class CheckoutOverviewPage {
         this.cancelButton = page.getByTestId("cancel");
     }
 
+    @Step("Concluir o pedido")
     public CheckoutCompletePage finish() {
         finishButton.click();
         return new CheckoutCompletePage(page);
     }
 
+    @Step("Cancelar e voltar ao inventário")
     public InventoryPage cancel() {
         cancelButton.click();
         return new InventoryPage(page);

@@ -2,6 +2,7 @@ package com.igorroberth.swaglabs.pages;
 
 import com.igorroberth.swaglabs.data.User;
 import com.igorroberth.swaglabs.support.TestConfig;
+import io.qameta.allure.Step;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 
@@ -24,23 +25,27 @@ public class LoginPage {
         this.errorMessage = page.getByTestId("error");
     }
 
+    @Step("Abrir a tela de login")
     public LoginPage navigate() {
         page.navigate(TestConfig.baseUrl());
         return this;
     }
 
+    @Step("Entrar como {0}")
     public InventoryPage loginAs(User user) {
         fillCredentials(user);
         submitButton.click();
         return new InventoryPage(page);
     }
 
+    @Step("Tentar entrar como {0}")
     public LoginPage loginExpectingFailure(User user) {
         fillCredentials(user);
         submitButton.click();
         return this;
     }
 
+    @Step("Enviar o formulário sem credenciais")
     public LoginPage submitWithoutCredentials() {
         submitButton.click();
         return this;

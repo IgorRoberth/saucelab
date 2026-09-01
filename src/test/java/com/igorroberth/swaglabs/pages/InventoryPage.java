@@ -6,6 +6,7 @@ import com.igorroberth.swaglabs.components.SidebarMenu;
 import com.igorroberth.swaglabs.data.Product;
 import com.igorroberth.swaglabs.data.SortOption;
 import com.igorroberth.swaglabs.support.TestConfig;
+import io.qameta.allure.Step;
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.AriaRole;
@@ -41,16 +42,19 @@ public class InventoryPage {
      * Navega pela URL, sem passar pelo login. Sem sessao o Swag Labs nao redireciona:
      * mantem a URL do inventario e renderiza a tela de login no lugar (AUTH-006).
      */
+    @Step("Abrir o inventário pela URL")
     public InventoryPage navigate() {
         page.navigate(TestConfig.baseUrl() + PATH);
         return this;
     }
 
+    @Step("Ordenar o catálogo por {0}")
     public InventoryPage sortBy(SortOption option) {
         sortSelect.selectOption(option.value());
         return this;
     }
 
+    @Step("Abrir o detalhe de {0}")
     public ProductPage openProduct(Product product) {
         // Derivado do locator da lista, declarado no construtor — o nome do produto vem
         // de data/, nao de uma string de seletor montada aqui.
@@ -58,21 +62,25 @@ public class InventoryPage {
         return new ProductPage(page);
     }
 
+    @Step("Adicionar {0} ao carrinho")
     public InventoryPage addToCart(Product product) {
         itemButton(product, "Add to cart").click();
         return this;
     }
 
+    @Step("Remover {0} pela listagem")
     public InventoryPage removeFromCart(Product product) {
         itemButton(product, "Remove").click();
         return this;
     }
 
+    @Step("Abrir o carrinho")
     public CartPage openCart() {
         cartBadge.open();
         return new CartPage(page);
     }
 
+    @Step("Sair pelo menu lateral")
     public LoginPage logout() {
         sidebarMenu.logout();
         return new LoginPage(page);
