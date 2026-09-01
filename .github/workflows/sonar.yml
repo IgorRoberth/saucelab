@@ -25,8 +25,22 @@ jobs:
           # introduziu; com clone raso todo issue vira "novo".
           fetch-depth: 0
 
+      - name: Verificar se o token chegou
+        # Teste no shell, e nao `if: env.SONAR_TOKEN != ''`: o contexto env em
+        # condicao de passo nao e confiavel quando o valor vem de secret, e a
+        # suite inteira ficava pulada sem dizer por que.
+        id: token
+        run: |
+          if [ -n "${SONAR_TOKEN:-}" ]; then
+            echo "presente=true" >> "$GITHUB_OUTPUT"
+            echo "SONAR_TOKEN encontrado (${#SONAR_TOKEN} caracteres)." >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "presente=false" >> "$GITHUB_OUTPUT"
+            echo "SONAR_TOKEN ausente ou vazio." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Configurar JDK 21
-        if: env.SONAR_TOKEN != ''
+        if: steps.token.outputs.presente == 'true'
         uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -36,15 +50,15 @@ jobs:
       - name: Compilar o codigo de teste
         # O scanner precisa dos .class para analisar Java: sem sonar.java.binaries
         # apontando para diretorio existente ele aborta.
-        if: env.SONAR_TOKEN != ''
+        if: steps.token.outputs.presente == 'true'
         run: mvn -B -q test-compile
 
       - name: Analisar
-        if: env.SONAR_TOKEN != ''
+        if: steps.token.outputs.presente == 'true'
         uses: SonarSource/sonarqube-scan-action@v8
 
       - name: Avisar que o Sonar esta desligado
-        if: env.SONAR_TOKEN == ''
+        if: steps.token.outputs.presente == 'false'
         run: |
           {
             echo "## Sonar nao executado"
