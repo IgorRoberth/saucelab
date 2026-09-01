@@ -1,0 +1,368 @@
+# .cursorrules — Suíte de Automação E2E Swag Labs
+
+Contrato de engenharia deste repositório. Vale para qualquer código gerado, revisado ou alterado aqui.
+
+---
+
+## 1. CONTEXTO
+
+Suíte de testes end-to-end em **Java 21 + Playwright**, estruturada em **Page Object Model**, com JUnit 5, AssertJ e Maven. Alvo: https://www.saucedemo.com
+
+Este é um repositório público de portfólio. **Clareza de leitura vale mais que esperteza técnica.** Quem abre este código pela primeira vez deve entender o que cada teste faz sem precisar navegar entre arquivos.
+
+---
+
+## 2. MODO DE OPERAÇÃO
+
+- **ALTERAÇÃO MÍNIMA:** produza o menor diff possível. Nunca reescreva um arquivo inteiro se poucas linhas resolvem.
+- **NÃO INVASIVO:** altere somente os arquivos estritamente necessários. Proibido renomear arquivos, reorganizar pacotes, mover classes ou atualizar dependências sem solicitação explícita.
+- **PRAGMATISMO:** nunca altere código apenas porque "poderia ser melhor". Altere para cumprir a solicitação.
+- **SEM ANTECIPAÇÃO:** não crie abstração para um segundo caso de uso que ainda não existe.
+
+### Arquivos protegidos
+
+Nunca altere, remova linhas ou reescreva os arquivos abaixo sem solicitação explícita e direta do usuário:
+
+| Arquivo | Motivo |
+|---|---|
+| `.gitignore` | Remover uma entrada pode versionar segredo, artefato ou binário de browser |
+| `.cursorrules` | Este contrato. Alterar as próprias regras é conflito de interesse |
+| `README.md` | Documento público do projeto |
+| `SPECS/SPEC_MODEL.md` | Catálogo de casos e decisões registradas |
+| `pom.xml` | Alterar versão de dependência sem pedido quebra a reprodutibilidade |
+| `.github/workflows/*` | Pipeline. Mudança silenciosa aqui altera o quality gate |
+
+**Adicionar** uma entrada nova ao `.gitignore` é permitido quando o próprio trabalho gera artefato que não deve ser versionado (`target/`, `allure-results/`, `traces/`). **Remover** entrada existente, nunca.
+
+Se qualquer solicitação exigir tocar num desses arquivos, **proponha a mudança e aguarde confirmação** antes de aplicar.
+
+---
+
+## 3. ARQUITETURA
+
+```
+src/test/java/
+├── pages/          # Page Objects — seletores e ações de página
+├── components/     # Componentes reutilizáveis (header, menu, badge do carrinho)
+├── tests/          # Cenários — orquestração e asserção apenas
+├── support/        # BaseTest, ciclo de vida do Playwright, fixtures
+└── data/           # Massa de teste, enums de usuário, mensagens esperadas
+```
+
+### Responsabilidade de cada camada
+
+| Camada | Pode | Não pode |
+|---|---|---|
+| `pages/` | Declarar seletores, expor ações e consultas | Conter asserção, conhecer JUnit |
+| `components/` | Encapsular elemento presente em várias páginas | Conhecer páginas específicas |
+| `tests/` | Orquestrar, asseverar | Conter seletor, montar URL |
+| `support/` | Gerenciar ciclo de vida, trace, contexto | Conter regra de negócio |
+| `data/` | Fornecer massa e strings esperadas | Conter lógica |
+
+---
+
+## 4. PAGE OBJECT MODEL — REGRAS INVIOLÁVEIS
+
+Cinco regras. Violação de qualquer uma reprova o código.
+
+1. **Nenhum seletor fora de `pages/` e `components/`.** Se `locator()`, `getByRole()` ou qualquer string de seletor aparecer em `tests/`, o padrão vazou.
+2. **Nenhuma asserção dentro de `pages/` e `components/`.** Page Object descreve capacidade; o veredito pertence ao teste.
+3. **Método que causa navegação retorna a próxima página.**
+4. **Page Object nunca instancia outra Page Object que não seja seu destino direto de navegação.**
+5. **`Page` é injetado no construtor.** Nunca criado, nunca estático, nunca campo global.
+
+### Exemplo correto
+
+```java
+public class LoginPage {
+
+    private final Page page;
+
+    private final Locator usernameField;
+    private final Locator passwordField;
+    private final Locator submitButton;
+    private final Locator errorMessage;
+
+    public LoginPage(Page page) {
+        this.page = page;
+        this.usernameField = page.getByTestId("username");
+        this.passwordField = page.getByTestId("password");
+        this.submitButton  = page.getByTestId("login-button");
+        this.errorMessage  = page.getByTestId("error");
+    }
+
+    public LoginPage navigate() {
+        page.navigate(BASE_URL);
+        return this;
+    }
+
+    public InventoryPage loginAs(User user) {
+        fillCredentials(user);
+        submitButton.click();
+        return new InventoryPage(page);
+    }
+
+    public LoginPage loginExpectingFailure(User user) {
+        fillCredentials(user);
+        submitButton.click();
+        return this;
+    }
+
+    public Locator errorMessage() {
+        return errorMessage;
+    }
+
+    private void fillCredentials(User user) {
+        usernameField.fill(user.username());
+        passwordField.fill(user.password());
+    }
+}
+```
+
+**Por que dois métodos de login:** `loginAs` retorna a próxima página porque o fluxo avança; `loginExpectingFailure` retorna a própria página porque o usuário permanece nela. Um método que às vezes retorna uma página e às vezes outra torna o teste ilegível.
+
+---
+
+## 5. CLEAN CODE
+
+### Nomes
+
+- **Métodos são verbos.** `addToCart()`, `removeItem()`, `sortByPriceAscending()`
+- **Classes são substantivos.** `CheckoutPage`, `CartBadge`, `UserData`
+- **Consultas sem prefixo `get`.** `errorMessage()`, não `getErrorMessage()`
+- **Booleanos perguntam.** `isVisible()`, `hasItems()`
+- **Testes descrevem comportamento.** `shouldBlockLockedOutUser()`, nunca `test1()` ou `testLogin()`
+
+### Funções
+
+- Máximo **20 linhas** por método. Lógica maior vira método privado com nome expressivo.
+- Máximo **3 parâmetros**. Acima disso, use um objeto de dados.
+- **Um nível de abstração por método.** Não misture clique em elemento com montagem de massa.
+
+### Fail fast
+
+Valide entrada no início do método, com guard clause. Retorne ou lance antes de processar.
+
+```java
+public void selectQuantity(int quantity) {
+    if (quantity < 1) {
+        throw new IllegalArgumentException("Quantity must be at least 1, got: " + quantity);
+    }
+    // ...
+}
+```
+
+### Comentários
+
+Comente o **porquê**, nunca o **o quê**. Se o método precisa de comentário explicando o que faz, o nome está errado.
+
+```java
+// RUIM
+// clica no botão de login
+submitButton.click();
+
+// BOM
+// O Swag Labs recarrega o inventário via client-side router após o login,
+// então esperamos o primeiro item em vez do load do documento.
+firstInventoryItem.waitFor();
+```
+
+### SOLID aplicado ao contexto
+
+- **S:** uma Page Object conhece uma página. Se ela sabe o que acontece em três telas, quebre.
+- **O:** novo cenário se escreve criando teste, não editando Page Object existente.
+- **L:** qualquer Page Object deve funcionar em qualquer browser da matrix, sem condicional por navegador.
+- **I:** não force uma Page Object a expor ação que só existe em outra página.
+- **D:** testes dependem de Page Objects, nunca de `Page` do Playwright diretamente.
+
+---
+
+## 6. ESCRITA DE TESTES
+
+### Estrutura obrigatória: Arrange → Act → Assert
+
+Separe as três fases com linha em branco. Sem comentários marcando as fases — a separação visual basta.
+
+```java
+@Test
+@DisplayName("Usuário bloqueado não deve acessar o inventário")
+void shouldBlockLockedOutUser() {
+    LoginPage loginPage = new LoginPage(page).navigate();
+
+    loginPage.loginExpectingFailure(User.LOCKED_OUT);
+
+    assertThat(loginPage.errorMessage())
+        .hasText(ErrorMessages.LOCKED_OUT);
+}
+```
+
+### Regras
+
+- **Um comportamento por teste.** Vários `assertThat` são aceitos se validam o mesmo comportamento.
+- **`@DisplayName` em português**, descrevendo o comportamento de negócio. Nome do método em inglês.
+- **Teste independente.** Nunca depende de execução anterior. Nenhum `@Order`, nenhum estado estático compartilhado.
+- **Mensagem esperada vem de `data/`.** String literal de mensagem dentro do teste é proibida.
+- **Sem lógica no teste.** Nada de `if`, `for` ou `try/catch` dentro de método de teste. Se precisar iterar, use `@ParameterizedTest`.
+
+---
+
+## 7. PLAYWRIGHT — REGRAS ESPECÍFICAS
+
+### Espera: asserção, nunca espera manual
+
+**Esta é a regra mais importante do arquivo para estabilidade.**
+
+O Playwright tem *web-first assertions*: asserções que reavaliam a condição em loop até ela ser satisfeita ou o timeout estourar. Elas substituem toda espera manual.
+
+```java
+// PROIBIDO — espera manual
+loginPage.errorLocator().waitFor();
+page.waitForSelector("[data-test=error]");
+Thread.sleep(2000);
+
+// PROIBIDO — snapshot congelado
+String message = errorLocator.textContent();
+assertThat(message).isEqualTo(ErrorMessages.LOCKED_OUT);
+
+// CORRETO — asserção que reavalia sozinha
+assertThat(loginPage.errorMessage()).hasText(ErrorMessages.LOCKED_OUT);
+```
+
+**Por que o snapshot congelado é flaky:** `textContent()` lê o DOM uma única vez, no instante da chamada. Se o elemento ainda não renderizou, você lê `null` ou string vazia e a asserção falha — mesmo que o elemento apareça 50ms depois. A web-first assertion tenta de novo até o timeout.
+
+### Consequência para as Page Objects
+
+Métodos de consulta retornam **`Locator`**, não `String`.
+
+```java
+// CORRETO
+public Locator errorMessage() {
+    return errorMessage;
+}
+
+// PROIBIDO
+public String errorMessage() {
+    return errorMessage.textContent();
+}
+```
+
+Retornar `Locator` não viola a regra 2 (sem asserção na Page Object) nem a regra 1 (sem seletor no teste): a Page Object entrega uma referência lazy, e o teste decide o veredito.
+
+### Colisão de nomes: dois `assertThat`
+
+O projeto usa duas bibliotecas com método de mesmo nome. A escolha não é estilística:
+
+| Import | Quando usar |
+|---|---|
+| `com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat` | **Sempre que a asserção tocar o DOM** — texto, visibilidade, contagem, atributo, URL |
+| `org.assertj.core.api.Assertions.assertThat` | Apenas valores puros já em memória, sem relação com a página |
+
+Na dúvida, use a do Playwright. Se a asserção envolve algo que a página pode renderizar em outro instante, a do AssertJ é a escolha errada.
+
+### Asserções web-first mais usadas
+
+```java
+assertThat(locator).isVisible();
+assertThat(locator).isHidden();
+assertThat(locator).hasText("texto exato");
+assertThat(locator).containsText("trecho");
+assertThat(locator).hasCount(6);
+assertThat(locator).isEnabled();
+assertThat(locator).hasAttribute("class", "error");
+```
+
+### Navegação: assevere a página de destino, nunca a URL
+
+O Playwright oferece `assertThat(page).hasURL(...)` e `assertThat(page).hasTitle(...)`, mas as duas **não têm uso nesta suíte**: ambas exigem o `page`, e `page` é proibido em `tests/` — a única camada onde asserção pode existir. Não há lugar legal para chamá-las.
+
+A verificação de navegação é feita pela Page Object de destino, que expõe um `Locator` de elemento exclusivo dela. O teste assevera visibilidade:
+
+```java
+LoginPage loginPage = new LoginPage(page).navigate();
+
+InventoryPage inventoryPage = loginPage.loginAs(User.STANDARD);
+
+assertThat(inventoryPage.container()).isVisible();
+```
+
+Isso é mais forte que asseverar a URL: a URL pode estar correta com a página quebrada.
+
+### Proibido
+
+- `Thread.sleep()` em qualquer lugar do repositório. Sem exceção.
+- `waitForTimeout()` como substituto disfarçado do sleep.
+- `waitFor()` e `waitForSelector()` quando existe web-first assertion equivalente.
+- `textContent()`, `innerText()` e `getAttribute()` seguidos de asserção — use a asserção do Playwright direto no `Locator`.
+- XPath, salvo impossibilidade comprovada e com comentário justificando.
+- `page` acessado dentro de `tests/`.
+
+### Obrigatório
+
+- **Confie no auto-waiting.** O Playwright já aguarda elemento visível, estável e habilitado antes de agir. Espera manual só quando houver condição que ele não cobre — e com comentário explicando qual.
+- **Locator, não ElementHandle.** Locator é lazy e reavalia; ElementHandle guarda referência que expira.
+- **Locators declarados no construtor** como `final`, nunca montados dentro dos métodos.
+
+### Ordem de preferência de seletor
+
+1. `getByTestId()` — o Swag Labs expõe `data-test` na maior parte dos elementos
+2. `getByRole()` — semântico e resistente a mudança visual
+3. `getByLabel()` / `getByPlaceholder()`
+4. CSS por `id`
+5. XPath — último recurso, exige justificativa
+
+### Isolamento
+
+Contexto de browser novo por teste. Nenhum estado de sessão compartilhado entre testes.
+
+---
+
+## 8. ANTES DE GERAR CÓDIGO
+
+Verifique, nesta ordem:
+
+1. Algum seletor está vazando para `tests/`?
+2. Alguma asserção está dentro de `pages/`?
+3. Existe `Thread.sleep`, `waitFor` ou espera arbitrária que uma web-first assertion resolveria?
+4. Alguma asserção lê `textContent()` em vez de asseverar sobre o `Locator`?
+5. O método de navegação retorna a próxima página?
+6. Algum método passa de 20 linhas?
+7. Alguma string de mensagem esperada está hardcoded no teste?
+8. O teste depende de outro teste para passar?
+9. A mudança toca algum arquivo protegido da seção 2?
+
+Se qualquer resposta for problemática, **alerte antes de implementar** — não implemente e corrija depois.
+
+---
+
+## 9. CI/CD E FERRAMENTAS
+
+O código gerado precisa passar por estas verificações automáticas. Considere-as ao escrever, não depois.
+
+| Ferramenta | Papel | Impacto no código |
+|---|---|---|
+| GitHub Actions | CI principal | Suíte roda em matrix Chromium/Firefox/WebKit — nada de condicional por browser |
+| GitLab CI | Pipeline espelhada semanal | Mesma suíte, sem código específico de plataforma |
+| SonarQube Cloud | Quality gate | Código duplicado, complexidade e code smell bloqueiam merge |
+| CodeQL | SAST | Alerta de severidade alta bloqueia merge |
+| Dependabot | Dependências | Não fixe versão com `LATEST` nem use range aberto no `pom.xml` |
+| Allure Report | Relatório publicado | Todo teste precisa de `@DisplayName`; anexos vão para `allure-results/` |
+| Lighthouse CI | Performance | Não interfere no código de teste |
+
+### Regras derivadas
+
+- **Nada de código específico de plataforma de CI.** Se o teste precisa saber que roda no GitHub Actions, o desenho está errado. A única distinção permitida é `RETRIES` por variável de ambiente.
+- **`@DisplayName` é obrigatório** em toda classe e método de teste — é o texto que aparece no Allure.
+- **Trace, vídeo e screenshot** são anexados na falha pelo `BaseTest`, nunca por chamada dentro do teste.
+- **Nenhum artefato versionado.** `target/`, `allure-results/`, `allure-report/` e `traces/` ficam no `.gitignore`.
+- **Sem `System.out.println`.** O SonarQube reprova e o output polui o log do CI. Use logger ou anexo do Allure.
+
+---
+
+## 10. FORA DE ESCOPO
+
+Não gere, sob nenhuma solicitação implícita:
+
+- Teste de carga contra o alvo público (abuso de infraestrutura de terceiros)
+- Varredura de segurança ativa contra o alvo
+- Teste de API — a aplicação não expõe backend público
+- Credencial real ou segredo versionado

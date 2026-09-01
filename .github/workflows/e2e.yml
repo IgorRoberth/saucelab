@@ -1,0 +1,139 @@
+name: E2E
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Regressao semanal contra o ambiente publico — segunda, 06:00 UTC.
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      browser:
+        description: Browser da execucao
+        type: choice
+        options: [all, chromium, firefox, webkit]
+        default: all
+      tests:
+        description: 'Filtro de classe (ex.: AuthenticationTest). Vazio roda a suite completa.'
+        type: string
+        default: ''
+
+# Um push novo cancela a execucao anterior do mesmo ref: feedback rapido vale
+# mais que terminar um run ja obsoleto.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  contract:
+    name: Contrato de arquitetura
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verificar regras do .cursorrules
+        run: bash .github/scripts/contract-lint.sh
+
+  browsers:
+    name: Definir browsers
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.pick.outputs.matrix }}
+    steps:
+      - id: pick
+        run: |
+          choice="${{ inputs.browser }}"
+          if [ -z "$choice" ] || [ "$choice" = "all" ]; then
+            echo 'matrix=["chromium","firefox","webkit"]' >> "$GITHUB_OUTPUT"
+          else
+            echo "matrix=[\"$choice\"]" >> "$GITHUB_OUTPUT"
+          fi
+
+  test:
+    name: ${{ matrix.browser }}
+    needs: browsers
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      # Um browser vermelho nao pode esconder o resultado dos outros dois.
+      fail-fast: false
+      matrix:
+        browser: ${{ fromJSON(needs.browsers.outputs.matrix) }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Cache dos binarios do Playwright
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ matrix.browser }}-${{ hashFiles('pom.xml') }}
+
+      - name: Compilar
+        run: mvn -B -DskipTests install
+
+      - name: Instalar browser
+        run: mvn -B exec:java -D exec.args="install --with-deps ${{ matrix.browser }}"
+
+      - name: Executar suite
+        # RETRIES=2 apenas aqui: retry local esconderia bug real durante o desenvolvimento.
+        run: >
+          mvn -B test
+          -D browser=${{ matrix.browser }}
+          -D surefire.rerunFailingTestsCount=2
+          ${{ inputs.tests && format('-D test={0}', inputs.tests) || '' }}
+
+      - name: Resumo da execucao
+        if: always()
+        run: |
+          {
+            echo "## ${{ matrix.browser }}"
+            echo ""
+            echo "| Suite | Testes | Falhas | Erros | Ignorados |"
+            echo "|---|--:|--:|--:|--:|"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          shopt -s nullglob
+          reports=(target/surefire-reports/*.txt)
+          if [ ${#reports[@]} -eq 0 ]; then
+            echo "| _nenhum relatorio gerado_ | | | | |" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          for report in "${reports[@]}"; do
+            suite=$(sed -n 's/^Test set: .*\.//p' "$report")
+            stats=$(grep -m1 '^Tests run:' "$report")
+            run=$(echo "$stats" | sed -n 's/.*Tests run: \([0-9]*\).*/\1/p')
+            failures=$(echo "$stats" | sed -n 's/.*Failures: \([0-9]*\).*/\1/p')
+            errors=$(echo "$stats" | sed -n 's/.*Errors: \([0-9]*\).*/\1/p')
+            skipped=$(echo "$stats" | sed -n 's/.*Skipped: \([0-9]*\).*/\1/p')
+            echo "| $suite | $run | $failures | $errors | $skipped |" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+      - name: Anexar evidencia da falha
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencia-${{ matrix.browser }}
+          path: |
+            target/traces/
+            target/videos/
+            target/allure-results/
+            target/surefire-reports/
+          retention-days: 7
+          if-no-files-found: ignore

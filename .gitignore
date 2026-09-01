@@ -1,0 +1,25 @@
+# Build
+target/
+
+# Ambiente
+.env
+
+# Playwright / evidencias
+test-results/
+playwright-report/
+allure-results/
+allure-report/
+traces/
+.allure/
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# SO
+.DS_Store
+Thumbs.db
