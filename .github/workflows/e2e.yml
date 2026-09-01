@@ -98,6 +98,12 @@ jobs:
           -D surefire.rerunFailingTestsCount=2
           ${{ inputs.tests && format('-D test={0}', inputs.tests) || '' }}
 
+      - name: Gerar relatorio Allure
+        # Sem este passo o artefato sai como JSON cru: o allure-results nao e um
+        # relatorio, e so o CLI transforma ele em HTML navegavel.
+        if: always()
+        run: mvn -B allure:report
+
       - name: Resumo da execucao
         if: always()
         run: |
@@ -125,15 +131,16 @@ jobs:
             echo "| $suite | $run | $failures | $errors | $skipped |" >> "$GITHUB_STEP_SUMMARY"
           done
 
-      - name: Anexar evidencia da falha
-        if: failure()
+      - name: Anexar evidencia
+        # Sempre: num run verde a evidencia e o que prova a execucao, e sem isto
+        # o allure-results morre com o runner.
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: evidencia-${{ matrix.browser }}
           path: |
-            target/traces/
-            target/videos/
-            target/allure-results/
+            target/allure-report/
+            target/evidencias/
             target/surefire-reports/
           retention-days: 7
           if-no-files-found: ignore

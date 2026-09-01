@@ -22,6 +22,9 @@
         <playwright.version>1.62.0</playwright.version>
         <assertj.version>3.27.7</assertj.version>
         <allure.version>2.35.4</allure.version>
+        <!-- O allure-commandline segue uma linha de versao propria: nao existe zip
+             2.35.4 no Central. Gerar o HTML exige uma versao publicada do CLI. -->
+        <allure.commandline.version>2.46.0</allure.commandline.version>
         <aspectj.version>1.9.25</aspectj.version>
 
         <compiler.plugin.version>3.15.0</compiler.plugin.version>
@@ -115,8 +118,9 @@
                 <artifactId>allure-maven</artifactId>
                 <version>${allure.maven.version}</version>
                 <configuration>
-                    <reportVersion>${allure.version}</reportVersion>
+                    <reportVersion>${allure.commandline.version}</reportVersion>
                     <resultsDirectory>${allure.results.directory}</resultsDirectory>
+                    <reportDirectory>${project.build.directory}/allure-report</reportDirectory>
                 </configuration>
             </plugin>
 

@@ -352,7 +352,9 @@ O código gerado precisa passar por estas verificações automáticas. Considere
 
 - **Nada de código específico de plataforma de CI.** Se o teste precisa saber que roda no GitHub Actions, o desenho está errado. A única distinção permitida é `RETRIES` por variável de ambiente.
 - **`@DisplayName` é obrigatório** em toda classe e método de teste — é o texto que aparece no Allure.
-- **Trace, vídeo e screenshot** são anexados na falha pelo `BaseTest`, nunca por chamada dentro do teste.
+- **Screenshot é anexado em todo teste; trace e vídeo, só na falha** — sempre pelo `BaseTest`,
+  nunca por chamada dentro do teste. Cada teste tem sua pasta em `target/evidencias/`,
+  nomeada pelo ID do catálogo extraído do `@DisplayName`.
 - **Nenhum artefato versionado.** `target/`, `allure-results/`, `allure-report/` e `traces/` ficam no `.gitignore`.
 - **Sem `System.out.println`.** O SonarQube reprova e o output polui o log do CI. Use logger ou anexo do Allure.
 

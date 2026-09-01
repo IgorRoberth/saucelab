@@ -16,7 +16,7 @@ Muita suíte de automação funciona na máquina de quem escreveu e falha em qua
 |---|---|
 | Teste que quebra sem o código mudar (flakiness) | Auto-waiting do Playwright, zero `sleep`, retry só em CI |
 | Suíte que demora e trava o feedback | Execução paralela por shards + matrix de browsers |
-| Falha em CI sem contexto para investigar | Trace, vídeo e screenshot anexados ao run |
+| Falha em CI sem contexto para investigar | Screenshot de todo teste; trace e vídeo na falha, anexados ao run |
 
 ---
 
@@ -105,7 +105,8 @@ Repositório público, portanto minutos ilimitados em runner padrão.
 - **`workflow_dispatch`** — execução manual com inputs para escolher browser e suíte
 - **Sharding** — execução dividida em paralelo, com merge dos relatórios ao final
 - **Cache** — dependências Maven e binários do Playwright
-- **Artefatos em falha** — `trace.zip`, vídeo e screenshot
+- **Evidência por teste** — uma pasta por caso em `target/evidencias/`, com screenshot sempre e `trace.zip` + vídeo na falha
+- **Relatório Allure** — HTML gerado e anexado a todo run, verde ou vermelho
 - **Job summary** — resumo de passou/falhou direto na aba Actions
 - **GitHub Pages** — relatório Allure publicado a cada execução
 
@@ -196,11 +197,13 @@ O relatório da última execução em CI fica publicado no GitHub Pages — link
 
 ### Investigando falhas
 
-Cada falha gera um `trace.zip` em `target/traces/`. Abra com:
+A execução deixa uma pasta por teste em `target/evidencias/`, nomeada pelo ID do catálogo —
+`AUTH-001-shouldSignInStandardUser/`. Todo teste guarda o screenshot final; o que falha guarda
+também o vídeo e o `trace.zip`. Abra o trace com:
 
 ```bash
 mvn exec:java -D exec.mainClass=com.microsoft.playwright.CLI \
-              -D exec.args="show-trace target/traces/<arquivo>.zip"
+              -D exec.args="show-trace target/evidencias/<pasta>/trace-<browser>.zip"
 ```
 
 O trace viewer mostra timeline, snapshot do DOM em cada passo, requisições de rede e console. É a forma mais rápida de entender uma falha que só acontece em CI.
@@ -230,7 +233,7 @@ Credenciais não são variáveis de ambiente: o Swag Labs publica os usuários d
 | `Executable doesn't exist` | Browsers não baixados | Rodar o comando `install` |
 | Falha ao iniciar browser no Linux | Bibliotecas de sistema ausentes | Rodar `install-deps` |
 | `UnsupportedClassVersionError` | JDK abaixo de 21 | Corrigir `JAVA_HOME` |
-| Testes passam local e falham em CI | Diferença de timing ou viewport | Abrir o `trace.zip` do run |
+| Testes passam local e falham em CI | Diferença de timing ou viewport | Abrir o `trace.zip` do artefato do run |
 | Download dos browsers muito lento | Rede corporativa com proxy | Definir `HTTPS_PROXY` antes do install |
 
 ---

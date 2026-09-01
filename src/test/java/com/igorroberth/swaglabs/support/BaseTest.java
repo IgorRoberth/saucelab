@@ -26,7 +26,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 @ExtendWith(FailureDetector.class)
 public abstract class BaseTest {
 
-    private static final Path TRACE_DIRECTORY = Path.of("target", "traces");
+    // Diretorio de gravacao bruta do Playwright. A evidencia final e copiada dali
+    // para a pasta do teste; o arquivo original e descartado no fim de cada teste.
     private static final Path VIDEO_DIRECTORY = Path.of("target", "videos");
 
     private static Playwright playwright;
@@ -35,7 +36,7 @@ public abstract class BaseTest {
     protected Page page;
 
     private BrowserContext context;
-    private String testName;
+    private Evidence evidence;
     private boolean failed;
 
     @BeforeAll
@@ -56,7 +57,8 @@ public abstract class BaseTest {
 
     @BeforeEach
     protected void openContext(TestInfo testInfo) {
-        testName = testInfo.getTestMethod().map(Method::getName).orElse("unknown");
+        String testName = testInfo.getTestMethod().map(Method::getName).orElse("unknown");
+        evidence = new Evidence(testInfo.getDisplayName(), testName);
         context = browser.newContext(
                 new Browser.NewContextOptions().setRecordVideoDir(VIDEO_DIRECTORY));
         context.setDefaultTimeout(TestConfig.timeoutMs());
@@ -69,9 +71,7 @@ public abstract class BaseTest {
 
     @AfterEach
     protected void closeContext() {
-        if (failed) {
-            Allure.getLifecycle().addAttachment("screenshot", "image/png", "png", page.screenshot());
-        }
+        saveScreenshot();
         stopTracing();
         var video = page.video();
         context.close();
@@ -93,8 +93,14 @@ public abstract class BaseTest {
         };
     }
 
+    private void saveScreenshot() {
+        Path screenshot = evidence.file("screenshot", ".png");
+        page.screenshot(new Page.ScreenshotOptions().setPath(screenshot).setFullPage(true));
+        attach("screenshot", "image/png", screenshot, ".png");
+    }
+
     private void stopTracing() {
-        Path trace = TRACE_DIRECTORY.resolve(testName + "-" + TestConfig.browser() + ".zip");
+        Path trace = evidence.file("trace", ".zip");
         // Path nulo faz o Playwright descartar o trace em vez de grava-lo.
         context.tracing().stop(new Tracing.StopOptions().setPath(failed ? trace : null));
         if (failed) {
@@ -107,10 +113,11 @@ public abstract class BaseTest {
             return;
         }
         if (failed) {
-            attach("video", "video/webm", video.path(), ".webm");
-        } else {
-            video.delete();
+            Path saved = evidence.file("video", ".webm");
+            video.saveAs(saved);
+            attach("video", "video/webm", saved, ".webm");
         }
+        video.delete();
     }
 
     private void attach(String name, String contentType, Path file, String extension) {
