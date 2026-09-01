@@ -1,0 +1,9 @@
+# Normaliza tudo em LF no repositorio e no checkout. Sem isso, o core.autocrlf
+# do Windows entrega contract-lint.sh com CRLF e o bash quebra no primeiro \r.
+* text=auto eol=lf
+
+# Binarios que nao podem ser tocados pela normalizacao.
+*.png binary
+*.jpg binary
+*.zip binary
+*.webm binary
