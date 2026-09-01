@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           # O Sonar usa o historico para atribuir cada issue ao commit que a
           # introduziu; com clone raso todo issue vira "novo".
