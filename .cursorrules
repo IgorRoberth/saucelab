@@ -8,7 +8,7 @@ Contrato de engenharia deste repositório. Vale para qualquer código gerado, re
 
 Suíte de testes end-to-end em **Java 21 + Playwright**, estruturada em **Page Object Model**, com JUnit 5, AssertJ e Maven. Alvo: https://www.saucedemo.com
 
-Este é um repositório público de portfólio. **Clareza de leitura vale mais que esperteza técnica.** Quem abre este código pela primeira vez deve entender o que cada teste faz sem precisar navegar entre arquivos.
+Este é um repositório público de portfólio. **Clareza de leitura vale muito.** Quem abre este código pela primeira vez deve entender o que cada teste faz sem precisar navegar entre arquivos.
 
 ---
 
