@@ -10,6 +10,7 @@ import com.igorroberth.swaglabs.pages.InventoryPage;
 import com.igorroberth.swaglabs.pages.LoginPage;
 import com.igorroberth.swaglabs.pages.ProductPage;
 import com.igorroberth.swaglabs.support.BaseTest;
+import io.qameta.allure.Allure;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -23,8 +24,10 @@ class CatalogTest extends BaseTest {
 
         InventoryPage inventoryPage = loginPage.loginAs(User.STANDARD);
 
-        assertThat(inventoryPage.items()).hasCount(Catalog.size());
-        assertThat(inventoryPage.itemNames()).hasText(Catalog.namesByNameAscending());
+        Allure.step("A listagem deve trazer todos os produtos do catálogo", () -> {
+            assertThat(inventoryPage.items()).hasCount(Catalog.size());
+            assertThat(inventoryPage.itemNames()).hasText(Catalog.namesByNameAscending());
+        });
     }
 
     @Test
@@ -38,7 +41,8 @@ class CatalogTest extends BaseTest {
 
         inventoryPage.sortBy(SortOption.NAME_ASCENDING);
 
-        assertThat(inventoryPage.itemNames()).hasText(Catalog.namesByNameAscending());
+        Allure.step("A listagem deve estar em ordem alfabética crescente", () ->
+                assertThat(inventoryPage.itemNames()).hasText(Catalog.namesByNameAscending()));
     }
 
     @Test
@@ -48,7 +52,8 @@ class CatalogTest extends BaseTest {
 
         inventoryPage.sortBy(SortOption.NAME_DESCENDING);
 
-        assertThat(inventoryPage.itemNames()).hasText(Catalog.namesByNameDescending());
+        Allure.step("A listagem deve estar em ordem alfabética decrescente", () ->
+                assertThat(inventoryPage.itemNames()).hasText(Catalog.namesByNameDescending()));
     }
 
     @Test
@@ -58,7 +63,8 @@ class CatalogTest extends BaseTest {
 
         inventoryPage.sortBy(SortOption.PRICE_ASCENDING);
 
-        assertThat(inventoryPage.itemPrices()).hasText(Catalog.pricesByPriceAscending());
+        Allure.step("Os preços devem estar do menor para o maior", () ->
+                assertThat(inventoryPage.itemPrices()).hasText(Catalog.pricesByPriceAscending()));
     }
 
     @Test
@@ -68,7 +74,8 @@ class CatalogTest extends BaseTest {
 
         inventoryPage.sortBy(SortOption.PRICE_DESCENDING);
 
-        assertThat(inventoryPage.itemPrices()).hasText(Catalog.pricesByPriceDescending());
+        Allure.step("Os preços devem estar do maior para o menor", () ->
+                assertThat(inventoryPage.itemPrices()).hasText(Catalog.pricesByPriceDescending()));
     }
 
     @Test
@@ -78,9 +85,11 @@ class CatalogTest extends BaseTest {
 
         ProductPage productPage = inventoryPage.openProduct(Product.BACKPACK);
 
-        assertThat(productPage.backToProducts()).isVisible();
-        assertThat(productPage.name()).hasText(Product.BACKPACK.displayName());
-        assertThat(productPage.price()).hasText(Product.BACKPACK.price());
-        assertThat(productPage.description()).hasText(Product.BACKPACK.description());
+        Allure.step("O detalhe deve exibir nome, preço e descrição do produto", () -> {
+            assertThat(productPage.backToProducts()).isVisible();
+            assertThat(productPage.name()).hasText(Product.BACKPACK.displayName());
+            assertThat(productPage.price()).hasText(Product.BACKPACK.price());
+            assertThat(productPage.description()).hasText(Product.BACKPACK.description());
+        });
     }
 }

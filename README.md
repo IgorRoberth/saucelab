@@ -113,6 +113,7 @@ Repositório público, portanto minutos ilimitados em runner padrão.
 - **Evidência por teste** — uma pasta por caso em `target/evidencias/`, com screenshot sempre e `trace.zip` + vídeo na falha
 - **Relatório Allure** — HTML gerado e anexado a todo run, verde ou vermelho
 - **Job summary** — resumo de passou/falhou direto na aba Actions
+- **Passo a passo no relatório** — cada ação e cada validação viram um passo nomeado, com screenshot próprio
 - **GitHub Pages** — relatório Allure publicado a cada execução
 
 ---

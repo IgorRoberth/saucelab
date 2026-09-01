@@ -131,13 +131,14 @@ jobs:
             echo "| $suite | $run | $failures | $errors | $skipped |" >> "$GITHUB_STEP_SUMMARY"
           done
 
-      - name: Anexar resultados crus para o relatorio agregado
-        # Separado da evidencia: o job de publicacao precisa do JSON dos tres
-        # browsers junto, e o HTML ja gerado nao da para mesclar.
+      - name: Anexar o JSON intermediario da agregacao
+        # Nao e artefato de consumo: e o JSON cru do Allure, com nomes em UUID,
+        # que o job de publicacao precisa dos tres browsers para agregar. Quem
+        # quer evidencia legivel usa evidencia-<browser> ou o relatorio no Pages.
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: allure-results-${{ matrix.browser }}
+          name: intermediario-nao-use-${{ matrix.browser }}
           path: target/allure-results/
           retention-days: 1
           if-no-files-found: ignore
@@ -188,7 +189,7 @@ jobs:
       - name: Baixar os resultados dos tres browsers
         uses: actions/download-artifact@v4
         with:
-          pattern: allure-results-*
+          pattern: intermediario-nao-use-*
           path: target/allure-results
           merge-multiple: true
 

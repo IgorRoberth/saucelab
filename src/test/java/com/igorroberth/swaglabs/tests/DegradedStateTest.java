@@ -13,6 +13,7 @@ import com.igorroberth.swaglabs.pages.CheckoutInformationPage;
 import com.igorroberth.swaglabs.pages.InventoryPage;
 import com.igorroberth.swaglabs.pages.LoginPage;
 import com.igorroberth.swaglabs.support.BaseTest;
+import io.qameta.allure.Allure;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -31,8 +32,9 @@ class DegradedStateTest extends BaseTest {
 
         InventoryPage inventoryPage = loginPage.loginAs(User.PROBLEM);
 
-        assertThat(inventoryPage.itemImage(Product.BACKPACK))
-                .hasAttribute("src", DegradedState.PLACEHOLDER_IMAGE);
+        Allure.step("A foto do produto deve estar substituída pela imagem genérica", () ->
+                assertThat(inventoryPage.itemImage(Product.BACKPACK))
+                        .hasAttribute("src", DegradedState.PLACEHOLDER_IMAGE));
     }
 
     @Test
@@ -42,7 +44,8 @@ class DegradedStateTest extends BaseTest {
 
         inventoryPage.sortBy(SortOption.NAME_DESCENDING);
 
-        assertThat(inventoryPage.itemNames()).hasText(Catalog.namesByNameAscending());
+        Allure.step("A listagem deve continuar em ordem crescente, sem reordenar", () ->
+                assertThat(inventoryPage.itemNames()).hasText(Catalog.namesByNameAscending()));
     }
 
     @Test
@@ -56,7 +59,8 @@ class DegradedStateTest extends BaseTest {
 
         informationPage.continueExpectingFailure(Customer.COMPLETE);
 
-        assertThat(informationPage.errorMessage()).hasText(ErrorMessages.LAST_NAME_REQUIRED);
+        Allure.step("O checkout deve recusar o formulário exigindo o sobrenome", () ->
+                assertThat(informationPage.errorMessage()).hasText(ErrorMessages.LAST_NAME_REQUIRED));
     }
 
     @Test
@@ -66,6 +70,7 @@ class DegradedStateTest extends BaseTest {
 
         InventoryPage inventoryPage = loginPage.loginAs(User.PERFORMANCE_GLITCH);
 
-        assertThat(inventoryPage.container()).isVisible();
+        Allure.step("O inventário deve estar visível dentro do timeout", () ->
+                assertThat(inventoryPage.container()).isVisible());
     }
 }

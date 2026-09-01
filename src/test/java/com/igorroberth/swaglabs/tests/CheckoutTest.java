@@ -14,6 +14,7 @@ import com.igorroberth.swaglabs.pages.CheckoutOverviewPage;
 import com.igorroberth.swaglabs.pages.InventoryPage;
 import com.igorroberth.swaglabs.pages.LoginPage;
 import com.igorroberth.swaglabs.support.BaseTest;
+import io.qameta.allure.Allure;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -30,8 +31,10 @@ class CheckoutTest extends BaseTest {
 
         CheckoutCompletePage completePage = overviewPage.finish();
 
-        assertThat(completePage.header()).hasText(OrderMessages.CONFIRMATION_HEADER);
-        assertThat(completePage.text()).hasText(OrderMessages.CONFIRMATION_TEXT);
+        Allure.step("O pedido deve estar confirmado", () -> {
+            assertThat(completePage.header()).hasText(OrderMessages.CONFIRMATION_HEADER);
+            assertThat(completePage.text()).hasText(OrderMessages.CONFIRMATION_TEXT);
+        });
     }
 
     @Test
@@ -41,7 +44,8 @@ class CheckoutTest extends BaseTest {
 
         informationPage.continueExpectingFailure(Customer.EMPTY);
 
-        assertThat(informationPage.errorMessage()).hasText(ErrorMessages.FIRST_NAME_REQUIRED);
+        Allure.step("O formulário deve exigir o primeiro nome", () ->
+                assertThat(informationPage.errorMessage()).hasText(ErrorMessages.FIRST_NAME_REQUIRED));
     }
 
     @Test
@@ -51,7 +55,8 @@ class CheckoutTest extends BaseTest {
 
         informationPage.continueExpectingFailure(Customer.WITHOUT_LAST_NAME);
 
-        assertThat(informationPage.errorMessage()).hasText(ErrorMessages.LAST_NAME_REQUIRED);
+        Allure.step("O formulário deve exigir o sobrenome", () ->
+                assertThat(informationPage.errorMessage()).hasText(ErrorMessages.LAST_NAME_REQUIRED));
     }
 
     @Test
@@ -61,7 +66,8 @@ class CheckoutTest extends BaseTest {
 
         informationPage.continueExpectingFailure(Customer.WITHOUT_POSTAL_CODE);
 
-        assertThat(informationPage.errorMessage()).hasText(ErrorMessages.POSTAL_CODE_REQUIRED);
+        Allure.step("O formulário deve exigir o código postal", () ->
+                assertThat(informationPage.errorMessage()).hasText(ErrorMessages.POSTAL_CODE_REQUIRED));
     }
 
     @Test
@@ -71,9 +77,11 @@ class CheckoutTest extends BaseTest {
 
         CheckoutOverviewPage overviewPage = informationPage.continueAs(Customer.COMPLETE);
 
-        assertThat(overviewPage.subtotal()).hasText(OrderTotals.SUBTOTAL);
-        assertThat(overviewPage.tax()).hasText(OrderTotals.TAX);
-        assertThat(overviewPage.total()).hasText(OrderTotals.TOTAL);
+        Allure.step("O resumo deve trazer subtotal, imposto e total corretos", () -> {
+            assertThat(overviewPage.subtotal()).hasText(OrderTotals.SUBTOTAL);
+            assertThat(overviewPage.tax()).hasText(OrderTotals.TAX);
+            assertThat(overviewPage.total()).hasText(OrderTotals.TOTAL);
+        });
     }
 
     @Test
@@ -83,8 +91,10 @@ class CheckoutTest extends BaseTest {
 
         InventoryPage inventoryPage = overviewPage.cancel();
 
-        assertThat(inventoryPage.container()).isVisible();
-        assertThat(inventoryPage.cartCounter()).hasText("2");
+        Allure.step("Deve voltar ao inventário com o carrinho preservado", () -> {
+            assertThat(inventoryPage.container()).isVisible();
+            assertThat(inventoryPage.cartCounter()).hasText("2");
+        });
     }
 
     @Test
@@ -98,7 +108,8 @@ class CheckoutTest extends BaseTest {
 
         CheckoutCompletePage completePage = overviewPage.finish();
 
-        assertThat(completePage.header()).hasText(OrderMessages.CONFIRMATION_HEADER);
+        Allure.step("O pedido deve ser confirmado mesmo sem itens", () ->
+                assertThat(completePage.header()).hasText(OrderMessages.CONFIRMATION_HEADER));
     }
 
     private InventoryPage signInWithReferenceBasket() {

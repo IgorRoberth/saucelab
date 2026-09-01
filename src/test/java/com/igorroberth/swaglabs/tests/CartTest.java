@@ -9,6 +9,7 @@ import com.igorroberth.swaglabs.pages.CartPage;
 import com.igorroberth.swaglabs.pages.InventoryPage;
 import com.igorroberth.swaglabs.pages.LoginPage;
 import com.igorroberth.swaglabs.support.BaseTest;
+import io.qameta.allure.Allure;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -22,7 +23,8 @@ class CartTest extends BaseTest {
 
         inventoryPage.addToCart(Product.BACKPACK);
 
-        assertThat(inventoryPage.cartCounter()).hasText("1");
+        Allure.step("O carrinho deve marcar uma unidade", () ->
+                assertThat(inventoryPage.cartCounter()).hasText("1"));
     }
 
     @Test
@@ -32,7 +34,8 @@ class CartTest extends BaseTest {
 
         inventoryPage.addToCart(Product.BACKPACK).addToCart(Product.BIKE_LIGHT);
 
-        assertThat(inventoryPage.cartCounter()).hasText("2");
+        Allure.step("O carrinho deve marcar duas unidades", () ->
+                assertThat(inventoryPage.cartCounter()).hasText("2"));
     }
 
     @Test
@@ -45,7 +48,8 @@ class CartTest extends BaseTest {
 
         inventoryPage.removeFromCart(Product.BIKE_LIGHT);
 
-        assertThat(inventoryPage.cartCounter()).hasText("1");
+        Allure.step("O carrinho deve voltar para uma unidade", () ->
+                assertThat(inventoryPage.cartCounter()).hasText("1"));
     }
 
     @Test
@@ -59,7 +63,8 @@ class CartTest extends BaseTest {
 
         cartPage.removeItem(Product.BIKE_LIGHT);
 
-        assertThat(cartPage.itemNames()).hasText(Catalog.namesOf(Product.BACKPACK));
+        Allure.step("O carrinho deve conter apenas a mochila", () ->
+                assertThat(cartPage.itemNames()).hasText(Catalog.namesOf(Product.BACKPACK)));
     }
 
     @Test
@@ -72,7 +77,8 @@ class CartTest extends BaseTest {
 
         CartPage cartPage = inventoryPage.openCart().continueShopping().openCart();
 
-        assertThat(cartPage.itemNames())
-                .hasText(Catalog.namesOf(Product.BACKPACK, Product.BIKE_LIGHT));
+        Allure.step("O carrinho deve manter os dois itens após a navegação", () ->
+                assertThat(cartPage.itemNames())
+                        .hasText(Catalog.namesOf(Product.BACKPACK, Product.BIKE_LIGHT)));
     }
 }

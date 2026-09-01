@@ -7,6 +7,7 @@ import com.igorroberth.swaglabs.data.User;
 import com.igorroberth.swaglabs.pages.InventoryPage;
 import com.igorroberth.swaglabs.pages.LoginPage;
 import com.igorroberth.swaglabs.support.BaseTest;
+import io.qameta.allure.Allure;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -20,7 +21,8 @@ class AuthenticationTest extends BaseTest {
 
         InventoryPage inventoryPage = loginPage.loginAs(User.STANDARD);
 
-        assertThat(inventoryPage.container()).isVisible();
+        Allure.step("O inventário deve estar visível", () ->
+                assertThat(inventoryPage.container()).isVisible());
     }
 
     @Test
@@ -30,7 +32,8 @@ class AuthenticationTest extends BaseTest {
 
         loginPage.loginExpectingFailure(User.STANDARD_WITH_WRONG_PASSWORD);
 
-        assertThat(loginPage.errorMessage()).hasText(ErrorMessages.INVALID_CREDENTIALS);
+        Allure.step("A tela de login deve acusar credencial inválida", () ->
+                assertThat(loginPage.errorMessage()).hasText(ErrorMessages.INVALID_CREDENTIALS));
     }
 
     @Test
@@ -40,7 +43,8 @@ class AuthenticationTest extends BaseTest {
 
         loginPage.submitWithoutCredentials();
 
-        assertThat(loginPage.errorMessage()).hasText(ErrorMessages.USERNAME_REQUIRED);
+        Allure.step("A tela de login deve exigir o usuário", () ->
+                assertThat(loginPage.errorMessage()).hasText(ErrorMessages.USERNAME_REQUIRED));
     }
 
     @Test
@@ -50,7 +54,8 @@ class AuthenticationTest extends BaseTest {
 
         loginPage.loginExpectingFailure(User.LOCKED_OUT);
 
-        assertThat(loginPage.errorMessage()).hasText(ErrorMessages.LOCKED_OUT);
+        Allure.step("A tela de login deve informar o bloqueio do usuário", () ->
+                assertThat(loginPage.errorMessage()).hasText(ErrorMessages.LOCKED_OUT));
     }
 
     @Test
@@ -60,7 +65,8 @@ class AuthenticationTest extends BaseTest {
 
         LoginPage loginPage = inventoryPage.logout();
 
-        assertThat(loginPage.container()).isVisible();
+        Allure.step("O usuário deve estar de volta na tela de login", () ->
+                assertThat(loginPage.container()).isVisible());
     }
 
     @Test
@@ -70,6 +76,7 @@ class AuthenticationTest extends BaseTest {
 
         new InventoryPage(page).navigate();
 
-        assertThat(loginPage.errorMessage()).hasText(ErrorMessages.INVENTORY_REQUIRES_SESSION);
+        Allure.step("O acesso deve ser recusado por falta de sessão", () ->
+                assertThat(loginPage.errorMessage()).hasText(ErrorMessages.INVENTORY_REQUIRES_SESSION));
     }
 }

@@ -191,14 +191,17 @@ void shouldBlockLockedOutUser() {
 
     loginPage.loginExpectingFailure(User.LOCKED_OUT);
 
-    assertThat(loginPage.errorMessage())
-        .hasText(ErrorMessages.LOCKED_OUT);
+    Allure.step("A tela de login deve informar o bloqueio do usuário", () ->
+            assertThat(loginPage.errorMessage()).hasText(ErrorMessages.LOCKED_OUT));
 }
 ```
 
 ### Regras
 
 - **Um comportamento por teste.** Vários `assertThat` são aceitos se validam o mesmo comportamento.
+- **A fase Assert vai dentro de `Allure.step`**, com o critério de negócio em português como nome do
+  passo. Sem isso o relatório mostra o que o teste fez e nunca o que ele conferiu. A asserção continua
+  no teste — o `Allure.step` só a nomeia.
 - **`@DisplayName` em português**, descrevendo o comportamento de negócio. Nome do método em inglês.
 - **Teste independente.** Nunca depende de execução anterior. Nenhum `@Order`, nenhum estado estático compartilhado.
 - **Mensagem esperada vem de `data/`.** String literal de mensagem dentro do teste é proibida.
@@ -351,7 +354,9 @@ O código gerado precisa passar por estas verificações automáticas. Considere
 
 - **Nada de código específico de plataforma de CI.** A CI é uma só, mas se o teste precisa saber que roda no GitHub Actions, o desenho está errado. A única distinção permitida é `RETRIES` por variável de ambiente.
 - **`@DisplayName` é obrigatório** em toda classe e método de teste — é o texto que aparece no Allure.
-- **Screenshot é anexado em todo teste; trace e vídeo, só na falha** — sempre pelo `BaseTest`,
+- **Screenshot é anexado a cada passo do Allure** pelo listener `StepScreenshot`, registrado por SPI —
+  nunca por chamada dentro do teste ou da Page Object.
+- **Screenshot final é anexado em todo teste; trace e vídeo, só na falha** — sempre pelo `BaseTest`,
   nunca por chamada dentro do teste. Cada teste tem sua pasta em `target/evidencias/`,
   nomeada pelo ID do catálogo extraído do `@DisplayName`.
 - **Nenhum artefato versionado.** `target/`, `allure-results/`, `allure-report/` e `traces/` ficam no `.gitignore`.

@@ -70,10 +70,12 @@ public abstract class BaseTest {
                 .setSnapshots(true)
                 .setSources(true));
         page = context.newPage();
+        StepScreenshot.watch(page);
     }
 
     @AfterEach
     protected void closeContext() {
+        StepScreenshot.stopWatching();
         saveScreenshot();
         stopTracing();
         var video = page.video();
