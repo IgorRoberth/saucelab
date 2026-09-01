@@ -9,7 +9,6 @@ import com.microsoft.playwright.Page;
 public class LoginPage {
 
     private final Page page;
-
     private final Locator container;
     private final Locator usernameField;
     private final Locator passwordField;

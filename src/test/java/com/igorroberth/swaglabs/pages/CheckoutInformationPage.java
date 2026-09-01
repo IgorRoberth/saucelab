@@ -11,7 +11,6 @@ public class CheckoutInformationPage {
 
     private final Page page;
     private final PageTitle pageTitle;
-
     private final Locator container;
     private final Locator firstNameField;
     private final Locator lastNameField;

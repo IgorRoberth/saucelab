@@ -19,7 +19,6 @@ public class InventoryPage {
     private final PageTitle pageTitle;
     private final SidebarMenu sidebarMenu;
     private final CartBadge cartBadge;
-
     private final Locator container;
     private final Locator items;
     private final Locator itemNames;

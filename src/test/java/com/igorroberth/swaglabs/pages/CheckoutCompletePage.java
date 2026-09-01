@@ -8,7 +8,6 @@ import com.microsoft.playwright.Page;
 public class CheckoutCompletePage {
 
     private final PageTitle pageTitle;
-
     private final Locator container;
     private final Locator header;
     private final Locator text;
