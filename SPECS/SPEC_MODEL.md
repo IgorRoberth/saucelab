@@ -31,7 +31,7 @@ Cada decisão registrada com a alternativa descartada e o motivo.
 | D-03 | Page Object Model | Screenplay Pattern | Legibilidade imediata para quem abre o repositório pela primeira vez; Screenplay adiciona indireção sem ganho neste escopo |
 | D-04 | JUnit 5 | TestNG | Ecossistema mais ativo, integração direta com Allure e Maven Surefire |
 | D-05 | Playwright web-first assertions para o DOM; AssertJ apenas para valores puros | AssertJ para tudo | Asserção do Playwright reavalia até o timeout, eliminando a maior fonte de flakiness; AssertJ sobre `textContent()` congela o DOM num instante único |
-| D-06 | GitHub Actions como CI principal | GitLab CI | Minutos ilimitados em repositório público; GitLab entra como pipeline espelhada semanal |
+| D-06 | GitHub Actions como única CI | GitLab CI espelhada | Minutos ilimitados em repositório público; espelhar a mesma suíte numa segunda plataforma não acrescenta cobertura nem informação, só custo de manutenção |
 
 ---
 

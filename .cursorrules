@@ -340,8 +340,7 @@ O código gerado precisa passar por estas verificações automáticas. Considere
 
 | Ferramenta | Papel | Impacto no código |
 |---|---|---|
-| GitHub Actions | CI principal | Suíte roda em matrix Chromium/Firefox/WebKit — nada de condicional por browser |
-| GitLab CI | Pipeline espelhada semanal | Mesma suíte, sem código específico de plataforma |
+| GitHub Actions | CI | Suíte roda em matrix Chromium/Firefox/WebKit — nada de condicional por browser |
 | SonarQube Cloud | Quality gate | Código duplicado, complexidade e code smell bloqueiam merge |
 | CodeQL | SAST | Alerta de severidade alta bloqueia merge |
 | Dependabot | Dependências | Não fixe versão com `LATEST` nem use range aberto no `pom.xml` |
@@ -350,7 +349,7 @@ O código gerado precisa passar por estas verificações automáticas. Considere
 
 ### Regras derivadas
 
-- **Nada de código específico de plataforma de CI.** Se o teste precisa saber que roda no GitHub Actions, o desenho está errado. A única distinção permitida é `RETRIES` por variável de ambiente.
+- **Nada de código específico de plataforma de CI.** A CI é uma só, mas se o teste precisa saber que roda no GitHub Actions, o desenho está errado. A única distinção permitida é `RETRIES` por variável de ambiente.
 - **`@DisplayName` é obrigatório** em toda classe e método de teste — é o texto que aparece no Allure.
 - **Screenshot é anexado em todo teste; trace e vídeo, só na falha** — sempre pelo `BaseTest`,
   nunca por chamada dentro do teste. Cada teste tem sua pasta em `target/evidencias/`,

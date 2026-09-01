@@ -6,7 +6,7 @@
 
 **[Relatório Allure da última execução](https://igorroberth.github.io/saucelab/)**
 
-Suíte de testes end-to-end em **Java + Playwright**, estruturada em **Page Object Model**, com pipeline de CI/CD completa em GitHub Actions e execução espelhada em GitLab CI.
+Suíte de testes end-to-end em **Java + Playwright**, estruturada em **Page Object Model**, com pipeline de CI/CD completa em GitHub Actions.
 
 O alvo é o [Swag Labs / SauceDemo](https://www.saucedemo.com) — aplicação pública mantida pela Sauce Labs para prática de automação, que expõe cenários de login com usuário bloqueado, usuário com falhas de renderização e usuário com degradação de performance.
 
@@ -36,8 +36,7 @@ Muita suíte de automação funciona na máquina de quem escreveu e falha em qua
 | Asserções | Playwright web-first assertions (DOM) + AssertJ (valores puros) |
 | Build | Maven |
 | Relatório | Allure Report, publicado no GitHub Pages |
-| CI principal | GitHub Actions |
-| CI secundário | GitLab CI |
+| CI | GitHub Actions |
 | Qualidade de código | SonarQube Cloud |
 | Segurança | CodeQL + Dependabot |
 | Performance | Lighthouse CI |
@@ -102,7 +101,7 @@ Cada teste tem um ID rastreável (`AUTH-001`, `CART-003`) referenciado no relat�
 
 ## Pipeline
 
-### GitHub Actions (principal)
+### GitHub Actions
 
 Repositório público, portanto minutos ilimitados em runner padrão.
 
@@ -115,10 +114,6 @@ Repositório público, portanto minutos ilimitados em runner padrão.
 - **Relatório Allure** — HTML gerado e anexado a todo run, verde ou vermelho
 - **Job summary** — resumo de passou/falhou direto na aba Actions
 - **GitHub Pages** — relatório Allure publicado a cada execução
-
-### GitLab CI (secundário)
-
-Mesma suíte, pipeline equivalente, execução semanal. Existe para demonstrar portabilidade entre plataformas — o tier gratuito do GitLab oferece 400 minutos/mês, suficiente para essa cadência.
 
 ---
 
@@ -296,7 +291,6 @@ Ordem deliberada: o repositório fica verde e funcional antes de ficar bonito.
 - [x] Matrix de browsers
 - [ ] Sharding
 - [x] Lighthouse CI
-- [x] Pipeline espelhada no GitLab CI
 
 ---
 
