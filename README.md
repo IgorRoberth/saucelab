@@ -1,5 +1,11 @@
 # Swag Labs — Suíte de Automação E2E
 
+[![E2E](https://github.com/IgorRoberth/saucelab/actions/workflows/e2e.yml/badge.svg)](https://github.com/IgorRoberth/saucelab/actions/workflows/e2e.yml)
+[![CodeQL](https://github.com/IgorRoberth/saucelab/actions/workflows/codeql.yml/badge.svg)](https://github.com/IgorRoberth/saucelab/actions/workflows/codeql.yml)
+[![Sonar](https://github.com/IgorRoberth/saucelab/actions/workflows/sonar.yml/badge.svg)](https://github.com/IgorRoberth/saucelab/actions/workflows/sonar.yml)
+
+**[Relatório Allure da última execução](https://igorroberth.github.io/saucelab/)**
+
 Suíte de testes end-to-end em **Java + Playwright**, estruturada em **Page Object Model**, com pipeline de CI/CD completa em GitHub Actions e execução espelhada em GitLab CI.
 
 O alvo é o [Swag Labs / SauceDemo](https://www.saucedemo.com) — aplicação pública mantida pela Sauce Labs para prática de automação, que expõe cenários de login com usuário bloqueado, usuário com falhas de renderização e usuário com degradação de performance.
@@ -282,13 +288,15 @@ Declaradas de propósito, porque o alvo é uma aplicação de demonstração:
 
 Ordem deliberada: o repositório fica verde e funcional antes de ficar bonito.
 
-- [ ] Suíte executando localmente com Page Object Model
-- [ ] Workflow básico no GitHub Actions
-- [ ] SonarQube Cloud + CodeQL + Dependabot
-- [ ] Allure Report publicado no GitHub Pages
-- [ ] Matrix de browsers e sharding
-- [ ] Lighthouse CI
-- [ ] Pipeline espelhada no GitLab CI
+- [x] Suíte executando localmente com Page Object Model
+- [x] Workflow básico no GitHub Actions
+- [x] CodeQL + Dependabot
+- [ ] SonarQube Cloud — workflow pronto, aguardando projeto criado e `SONAR_TOKEN` no repositório
+- [x] Allure Report publicado no GitHub Pages
+- [x] Matrix de browsers
+- [ ] Sharding
+- [x] Lighthouse CI
+- [x] Pipeline espelhada no GitLab CI
 
 ---
 

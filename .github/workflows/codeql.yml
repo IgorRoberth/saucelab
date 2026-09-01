@@ -1,0 +1,49 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Varredura semanal: alerta novo pode surgir de regra nova, sem o codigo mudar.
+    - cron: '0 7 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Analise estatica
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      security-events: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Inicializar CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: java-kotlin
+          # Manual, e nao autobuild: o repositorio nao tem src/main. O autobuild
+          # roda um build que pula o codigo de teste e analisaria zero classe.
+          build-mode: manual
+          queries: security-and-quality
+
+      - name: Compilar o codigo de teste
+        run: mvn -B -q test-compile
+
+      - name: Analisar
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:java-kotlin

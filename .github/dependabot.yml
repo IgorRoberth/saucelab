@@ -1,0 +1,37 @@
+# Atualizacao de dependencias. Duas ecossistemas: as libs do pom e as actions
+# do CI — action desatualizada e a fonte mais comum de pipeline quebrada.
+version: 2
+
+updates:
+  - package-ecosystem: maven
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: America/Sao_Paulo
+    open-pull-requests-limit: 5
+    labels: [dependencias]
+    commit-message:
+      prefix: build
+    groups:
+      # Playwright, JUnit e Allure sobem juntos com frequencia; um PR por grupo
+      # evita tres PRs que se invalidam entre si.
+      testing:
+        patterns:
+          - com.microsoft.playwright:*
+          - org.junit*:*
+          - org.assertj:*
+          - io.qameta.allure:*
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '06:00'
+      timezone: America/Sao_Paulo
+    open-pull-requests-limit: 5
+    labels: [ci]
+    commit-message:
+      prefix: ci

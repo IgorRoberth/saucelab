@@ -131,6 +131,17 @@ jobs:
             echo "| $suite | $run | $failures | $errors | $skipped |" >> "$GITHUB_STEP_SUMMARY"
           done
 
+      - name: Anexar resultados crus para o relatorio agregado
+        # Separado da evidencia: o job de publicacao precisa do JSON dos tres
+        # browsers junto, e o HTML ja gerado nao da para mesclar.
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results-${{ matrix.browser }}
+          path: target/allure-results/
+          retention-days: 1
+          if-no-files-found: ignore
+
       - name: Anexar evidencia
         # Sempre: num run verde a evidencia e o que prova a execucao, e sem isto
         # o allure-results morre com o runner.
@@ -144,3 +155,51 @@ jobs:
             target/surefire-reports/
           retention-days: 7
           if-no-files-found: ignore
+
+  report:
+    name: Publicar relatorio
+    needs: test
+    # always(): um run vermelho e justamente quando o relatorio importa mais.
+    # Pull request nao publica: o Pages tem um endereco so, e PR sobrescreveria main.
+    if: always() && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Baixar os resultados dos tres browsers
+        uses: actions/download-artifact@v4
+        with:
+          pattern: allure-results-*
+          path: target/allure-results
+          merge-multiple: true
+
+      - name: Gerar relatorio agregado
+        run: mvn -B allure:report
+
+      - name: Empacotar para o Pages
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: target/allure-report
+
+      - name: Publicar
+        id: deploy
+        uses: actions/deploy-pages@v5

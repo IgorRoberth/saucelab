@@ -59,6 +59,9 @@ public abstract class BaseTest {
     protected void openContext(TestInfo testInfo) {
         String testName = testInfo.getTestMethod().map(Method::getName).orElse("unknown");
         evidence = new Evidence(testInfo.getDisplayName(), testName);
+        // Sem este parametro o historyId dos tres browsers e identico, e o relatorio
+        // agregado do CI colapsa as tres execucoes do mesmo caso numa so, como retry.
+        Allure.parameter("browser", TestConfig.browser());
         context = browser.newContext(
                 new Browser.NewContextOptions().setRecordVideoDir(VIDEO_DIRECTORY));
         context.setDefaultTimeout(TestConfig.timeoutMs());

@@ -1,0 +1,55 @@
+name: Sonar
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  analyze:
+    name: Quality gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # O Sonar usa o historico para atribuir cada issue ao commit que a
+          # introduziu; com clone raso todo issue vira "novo".
+          fetch-depth: 0
+
+      - name: Configurar JDK 21
+        if: env.SONAR_TOKEN != ''
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+
+      - name: Compilar o codigo de teste
+        # O scanner precisa dos .class para analisar Java: sem sonar.java.binaries
+        # apontando para diretorio existente ele aborta.
+        if: env.SONAR_TOKEN != ''
+        run: mvn -B -q test-compile
+
+      - name: Analisar
+        if: env.SONAR_TOKEN != ''
+        uses: SonarSource/sonarqube-scan-action@v8
+
+      - name: Avisar que o Sonar esta desligado
+        if: env.SONAR_TOKEN == ''
+        run: |
+          {
+            echo "## Sonar nao executado"
+            echo ""
+            echo "O secret \`SONAR_TOKEN\` nao esta configurado no repositorio."
+            echo "Crie o projeto em https://sonarcloud.io e adicione o token em"
+            echo "Settings > Secrets and variables > Actions."
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -1,0 +1,36 @@
+name: Lighthouse
+
+# Agendado, nunca por push: o alvo e infraestrutura de terceiros e a secao 10 do
+# .cursorrules proibe carga contra ele. Tres execucoes por semana e medicao, nao carga.
+on:
+  schedule:
+    - cron: '0 8 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: Auditoria da pagina publica
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Auditar
+        # So a tela de login e auditavel sem sessao; o inventario exige um login
+        # que o Lighthouse nao faz. As assercoes sao warn de proposito: numero de
+        # performance de site de terceiro nao pode bloquear merge desta suite.
+        uses: treosh/lighthouse-ci-action@12.6.2
+        with:
+          configPath: .lighthouserc.json
+          uploadArtifacts: true
+          temporaryPublicStorage: true
