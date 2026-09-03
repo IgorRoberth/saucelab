@@ -13,6 +13,14 @@
     <name>Swag Labs E2E</name>
     <description>Suite de testes end-to-end do Swag Labs em Java 21 + Playwright</description>
 
+    <licenses>
+        <license>
+            <name>Licença MIT</name>
+            <url>https://opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
     <properties>
         <maven.compiler.release>21</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

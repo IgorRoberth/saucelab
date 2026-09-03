@@ -3,6 +3,7 @@
 [![E2E](https://github.com/IgorRoberth/saucelab/actions/workflows/e2e.yml/badge.svg)](https://github.com/IgorRoberth/saucelab/actions/workflows/e2e.yml)
 [![CodeQL](https://github.com/IgorRoberth/saucelab/actions/workflows/codeql.yml/badge.svg)](https://github.com/IgorRoberth/saucelab/actions/workflows/codeql.yml)
 [![Sonar](https://github.com/IgorRoberth/saucelab/actions/workflows/sonar.yml/badge.svg)](https://github.com/IgorRoberth/saucelab/actions/workflows/sonar.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **[Relatório Allure da última execução](https://igorroberth.github.io/saucelab/)**
 
@@ -299,3 +300,8 @@ Ordem deliberada: o repositório fica verde e funcional antes de ficar bonito.
 
 Igor Roberth — QA com foco em automação e segurança.
 [LinkedIn](https://linkedin.com/in/igorroberth) · [GitHub](https://github.com/IgorRoberth)
+---
+
+## Licença
+
+Distribuído sob a [Licença MIT](LICENSE) — uso livre, inclusive comercial, mantendo o aviso de copyright.
