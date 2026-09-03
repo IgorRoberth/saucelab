@@ -169,7 +169,7 @@ jobs:
 
   report:
     name: Publicar relatorio
-    needs: test
+    needs: [browsers, test]
     # always(): um run vermelho e justamente quando o relatorio importa mais.
     # Pull request nao publica: o Pages tem um endereco so, e PR sobrescreveria main.
     if: always() && github.event_name != 'pull_request'
@@ -241,6 +241,20 @@ jobs:
             "reportUrl": "$PAGES_URL"
           }
           EOF
+
+      - name: Ajustar o ambiente do relatorio agregado
+        # Os tres artefatos trazem o mesmo environment.properties com um Browser
+        # diferente cada, e o merge preserva so o ultimo. No agregado a informacao
+        # honesta e a matriz inteira, mais o commit que originou o run.
+        run: |
+          file=target/allure-results/environment.properties
+          [ -f "$file" ] || : > "$file"
+          grep -v '^Browser=' "$file" > "$file.tmp" || true
+          mv "$file.tmp" "$file"
+          {
+            echo "Browsers=${{ join(fromJSON(needs.browsers.outputs.matrix), ', ') }}"
+            echo "Commit=${{ github.sha }}"
+          } >> "$file"
 
       - name: Instalar o Allure CLI
         # O zip do Maven Central, e nao o pacote npm: o npm publica uma linha de

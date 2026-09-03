@@ -198,21 +198,49 @@ mvn allure:serve       # gera e abre no navegador
 
 O relatório da última execução em CI fica publicado no GitHub Pages — link no topo deste README.
 
-### Métricas do relatório
+### Como ler o relatório Allure
 
-O Allure publicado traz, além do passo a passo de cada caso, seis painéis de leitura rápida:
+O relatório é um site estático com sete telas no menu lateral. Cada uma responde uma pergunta diferente:
+
+| Tela | Para que serve |
+|---|---|
+| **Visão geral** | O painel de entrada: resultado do run, tendência, categorias de falha, ambiente e executor |
+| **Categorias** | Agrupa as falhas por tipo de defeito, não por teste — responde "que espécie de problema é este?" |
+| **Suítes** | A árvore de execução como ela é: classe → método. É por aqui que se acha um caso pelo ID (`AUTH-003`) |
+| **Comportamentos** | Os mesmos testes agrupados por domínio de negócio, quando anotados com `@Epic`/`@Feature`/`@Story` |
+| **Pacotes** | A mesma árvore, organizada pelo pacote Java — útil para quem navega o código junto |
+| **Gráficos** | Todos os gráficos numa tela só: status, severidade, duração e as quatro tendências |
+| **Linha do tempo** | Quando cada teste rodou e em qual worker — mostra onde o paralelismo está ocioso ou desbalanceado |
+
+#### Os painéis da Visão geral
 
 | Painel | O que responde | De onde vem o dado |
 |---|---|---|
 | Situação | Quanto da suíte passou, falhou, quebrou ou foi ignorado neste run | Status de cada teste |
-| Duração | Como os testes se distribuem por tempo de execução — expõe o caso lento isolado | Cronometragem do run |
-| Severidade | O que quebrou pesa quanto: uma falha `blocker` e uma `minor` não valem o mesmo | `@Severity` nos testes |
 | Tendência | Passou/falhou run a run — mostra regressão e instabilidade ao longo do tempo | Histórico acumulado |
+| Suítes | Onde a falha se concentra: qual área do produto está vermelha | Classes de teste |
+| Categorias | Que tipo de defeito apareceu neste run | `categories.json` |
+| Ambiente | Contra o que a suíte rodou: URL, browsers, versões, commit | `environment.properties` |
+| Executores | Qual run do CI gerou este relatório — o link leva ao job no GitHub Actions | `executor.json` |
+
+#### Os gráficos da tela Gráficos
+
+| Gráfico | O que responde | De onde vem o dado |
+|---|---|---|
+| Status | A mesma leitura do donut da capa, em barra | Status de cada teste |
+| Severidade | O que quebrou pesa quanto: uma falha `blocker` e uma `minor` não valem o mesmo | `@Severity` nos testes |
+| Duração | Como os testes se distribuem por tempo — expõe o caso lento isolado | Cronometragem do run |
 | Tendência das durações | Se a suíte está ficando mais lenta a cada run | Histórico acumulado |
 | Tendência das tentativas | Quantos testes só passaram no retry — é o termômetro de flakiness | Histórico acumulado |
-| Tendência das categorias | Se o tipo de falha muda de perfil (defeito de produto x defeito de teste) | Histórico acumulado |
+| Tendência das categorias | Se o perfil da falha muda: defeito de produto ou defeito de teste | Histórico acumulado |
 
-**Severidade.** Todo teste declara o impacto do que ele protege, para que a triagem de um run vermelho comece pelo que importa:
+#### Dentro de um caso de teste
+
+Abrir um teste mostra o passo a passo (`@Step` e `Allure.step`), com screenshot anexado a cada passo, além do parâmetro `browser`, das tentativas de retry e do histórico do caso nos runs anteriores. Num teste que falhou, entram também o vídeo e o `trace.zip`.
+
+#### Severidade
+
+Todo teste declara o impacto do que ele protege, para que a triagem de um run vermelho comece pelo que importa:
 
 | Nível | Critério | Exemplos |
 |---|---|---|
@@ -222,7 +250,19 @@ O Allure publicado traz, além do passo a passo de cada caso, seis painéis de l
 | `minor` | Incômodo visível, sem impedir a compra | Ordenação por nome, imagem genérica sob `problem_user` |
 | `trivial` | Comportamento apenas documentado | CKO-005, o checkout que conclui com carrinho vazio |
 
-**Tendências.** Os quatro gráficos de tendência são desenhados a partir da pasta `history/` do relatório anterior — sem ela o Allure não tem memória e o painel sai vazio. No CI o `target/` nasce limpo a cada run, então o job de publicação busca esse histórico de onde ele de fato está: o próprio relatório publicado no Pages. Junto vai um `executor.json`, que dá identidade ao run — sem ele os pontos não têm eixo e o Allure desenha "não há nada para mostrar" mesmo com o histórico presente. Por isso o relatório agregado é gerado pelo CLI do Allure, e não por `mvn allure:report`: o plugin do Maven sobrescreve esse `executor.json` pelo dele.
+#### Categorias
+
+`src/test/resources/allure/categories.json` classifica a falha pela mensagem de erro — timeout de espera, elemento não encontrado, falha de asserção, falha de infraestrutura, defeito conhecido sob `problem_user`. Serve para triar um run vermelho por causa raiz, em vez de abrir teste por teste.
+
+Com a suíte verde este painel aparece vazio, e isso está certo: categoria só existe onde há defeito.
+
+#### Ambiente
+
+`src/test/resources/allure/environment.properties` é copiado para o `allure-results` antes dos testes, com as versões resolvidas pelo Maven. No relatório agregado do CI a linha do browser é substituída pela matriz inteira, já que ali as três execuções convivem no mesmo relatório.
+
+#### Tendências
+
+Os quatro gráficos de tendência são desenhados a partir da pasta `history/` do relatório anterior — sem ela o Allure não tem memória e o painel sai vazio. No CI o `target/` nasce limpo a cada run, então o job de publicação busca esse histórico de onde ele de fato está: o próprio relatório publicado no Pages. Junto vai um `executor.json`, que dá identidade ao run — sem ele os pontos não têm eixo e o Allure desenha "não há nada para mostrar" mesmo com o histórico presente. Por isso o relatório agregado é gerado pelo CLI do Allure, e não por `mvn allure:report`: o plugin do Maven sobrescreve esse `executor.json` pelo dele.
 
 Consequência prática: um run isolado mostra um ponto só. A tendência começa a ter leitura a partir do segundo run publicado em `main`.
 

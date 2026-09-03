@@ -39,8 +39,16 @@
         <surefire.plugin.version>3.5.6</surefire.plugin.version>
         <allure.maven.version>3.0.3</allure.maven.version>
         <exec.plugin.version>3.6.3</exec.plugin.version>
+        <resources.plugin.version>3.5.0</resources.plugin.version>
 
         <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
+
+        <!-- Espelham os defaults do TestConfig. Servem para o filtro escrever o
+             environment.properties do relatorio; -D baseUrl=... sobrepoe os dois,
+             porque a propriedade de sistema vence a do pom no filtro de recursos. -->
+        <baseUrl>https://www.saucedemo.com</baseUrl>
+        <browser>chromium</browser>
+        <timeoutMs>30000</timeoutMs>
 
         <!-- Filtro de tags. Quarentena fica fora da execucao padrao;
              para rodar so os instaveis: -Dgroups=quarantine -DexcludedGroups= -->
@@ -119,6 +127,33 @@
                         <version>${aspectj.version}</version>
                     </dependency>
                 </dependencies>
+            </plugin>
+
+            <!-- Leva categories.json e environment.properties para dentro do
+                 allure-results antes dos testes rodarem: o Allure so le os dois
+                 de la, e o filtro resolve as versoes declaradas acima. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>${resources.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>allure-metadata</id>
+                        <phase>generate-test-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${allure.results.directory}</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/test/resources/allure</directory>
+                                    <filtering>true</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
 
             <plugin>

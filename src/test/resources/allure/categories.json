@@ -1,0 +1,35 @@
+[
+  {
+    "name": "Defeito conhecido do ambiente degradado",
+    "messageRegex": ".*problem_user.*",
+    "matchedStatuses": ["failed"]
+  },
+  {
+    "name": "Timeout de espera",
+    "messageRegex": ".*(?i)(timeout|timed out).*",
+    "matchedStatuses": ["failed", "broken"]
+  },
+  {
+    "name": "Elemento nao encontrado ou ambiguo",
+    "messageRegex": ".*(strict mode violation|resolved to 0 elements|not visible|no element matches).*",
+    "matchedStatuses": ["failed", "broken"]
+  },
+  {
+    "name": "Falha de assercao",
+    "messageRegex": ".*(AssertionFailedError|Expecting|expected:).*",
+    "matchedStatuses": ["failed"]
+  },
+  {
+    "name": "Falha de infraestrutura",
+    "messageRegex": ".*(net::ERR|ECONNREFUSED|Connection refused|browser has been closed|Browser closed).*",
+    "matchedStatuses": ["broken"]
+  },
+  {
+    "name": "Defeito de produto",
+    "matchedStatuses": ["failed"]
+  },
+  {
+    "name": "Defeito de teste",
+    "matchedStatuses": ["broken"]
+  }
+]
