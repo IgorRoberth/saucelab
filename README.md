@@ -198,6 +198,36 @@ mvn allure:serve       # gera e abre no navegador
 
 O relatório da última execução em CI fica publicado no GitHub Pages — link no topo deste README.
 
+### Métricas do relatório
+
+O Allure publicado traz, além do passo a passo de cada caso, seis painéis de leitura rápida:
+
+| Painel | O que responde | De onde vem o dado |
+|---|---|---|
+| Situação | Quanto da suíte passou, falhou, quebrou ou foi ignorado neste run | Status de cada teste |
+| Duração | Como os testes se distribuem por tempo de execução — expõe o caso lento isolado | Cronometragem do run |
+| Severidade | O que quebrou pesa quanto: uma falha `blocker` e uma `minor` não valem o mesmo | `@Severity` nos testes |
+| Tendência | Passou/falhou run a run — mostra regressão e instabilidade ao longo do tempo | Histórico acumulado |
+| Tendência das durações | Se a suíte está ficando mais lenta a cada run | Histórico acumulado |
+| Tendência das tentativas | Quantos testes só passaram no retry — é o termômetro de flakiness | Histórico acumulado |
+| Tendência das categorias | Se o tipo de falha muda de perfil (defeito de produto x defeito de teste) | Histórico acumulado |
+
+**Severidade.** Todo teste declara o impacto do que ele protege, para que a triagem de um run vermelho comece pelo que importa:
+
+| Nível | Critério | Exemplos |
+|---|---|---|
+| `blocker` | Sem isto não há produto | Login válido, listagem do catálogo, fluxo completo de checkout |
+| `critical` | Perda de dinheiro ou de controle de acesso | Usuário bloqueado, acesso sem sessão, adicionar ao carrinho, cálculo do total |
+| `normal` | Funcionalidade esperada, com contorno | Validações de formulário, logout, ordenação por preço |
+| `minor` | Incômodo visível, sem impedir a compra | Ordenação por nome, imagem genérica sob `problem_user` |
+| `trivial` | Comportamento apenas documentado | CKO-005, o checkout que conclui com carrinho vazio |
+
+**Tendências.** Os quatro gráficos de tendência são desenhados a partir da pasta `history/` do relatório anterior — sem ela o Allure não tem memória e o painel sai vazio. No CI o `target/` nasce limpo a cada run, então o job de publicação busca esse histórico de onde ele de fato está: o próprio relatório publicado no Pages. Junto vai um `executor.json`, que transforma cada ponto do gráfico em link para o run que o produziu.
+
+Consequência prática: um run isolado mostra um ponto só. A tendência começa a ter leitura a partir do segundo run publicado em `main`.
+
+---
+
 ### Investigando falhas
 
 A execução deixa uma pasta por teste em `target/evidencias/`, nomeada pelo ID do catálogo —

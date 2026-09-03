@@ -8,12 +8,15 @@ import com.igorroberth.swaglabs.pages.InventoryPage;
 import com.igorroberth.swaglabs.pages.LoginPage;
 import com.igorroberth.swaglabs.support.BaseTest;
 import io.qameta.allure.Allure;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("AUTH — Autenticação")
 class AuthenticationTest extends BaseTest {
 
+    @Severity(SeverityLevel.BLOCKER)
     @Test
     @DisplayName("AUTH-001: usuário válido deve acessar o inventário")
     void shouldSignInStandardUser() {
@@ -25,6 +28,7 @@ class AuthenticationTest extends BaseTest {
                 assertThat(inventoryPage.container()).isVisible());
     }
 
+    @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("AUTH-002: senha incorreta deve manter o usuário na tela de login")
     void shouldRejectInvalidPassword() {
@@ -36,6 +40,7 @@ class AuthenticationTest extends BaseTest {
                 assertThat(loginPage.errorMessage()).hasText(ErrorMessages.INVALID_CREDENTIALS));
     }
 
+    @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("AUTH-003: envio com campos vazios deve exigir o usuário")
     void shouldRequireUsername() {
@@ -47,6 +52,7 @@ class AuthenticationTest extends BaseTest {
                 assertThat(loginPage.errorMessage()).hasText(ErrorMessages.USERNAME_REQUIRED));
     }
 
+    @Severity(SeverityLevel.CRITICAL)
     @Test
     @DisplayName("AUTH-004: usuário bloqueado não deve acessar o inventário")
     void shouldBlockLockedOutUser() {
@@ -58,6 +64,7 @@ class AuthenticationTest extends BaseTest {
                 assertThat(loginPage.errorMessage()).hasText(ErrorMessages.LOCKED_OUT));
     }
 
+    @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("AUTH-005: logout pelo menu lateral deve devolver o usuário ao login")
     void shouldSignOutThroughSidebarMenu() {
@@ -69,6 +76,7 @@ class AuthenticationTest extends BaseTest {
                 assertThat(loginPage.container()).isVisible());
     }
 
+    @Severity(SeverityLevel.CRITICAL)
     @Test
     @DisplayName("AUTH-006: acesso direto ao inventário sem sessão deve ser bloqueado")
     void shouldBlockDirectInventoryAccessWithoutSession() {

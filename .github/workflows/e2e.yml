@@ -203,6 +203,45 @@ jobs:
           path: target/allure-results
           merge-multiple: true
 
+      - name: Recuperar o historico do relatorio publicado
+        # Os quatro graficos de tendencia (tendencia, duracoes, categorias e
+        # tentativas) sao desenhados a partir da pasta history do relatorio
+        # anterior. Ela vive no Pages, nao no repositorio: sem trazer de volta,
+        # cada run gera um relatorio sem memoria e os quatro ficam vazios.
+        run: |
+          owner=$(echo '${{ github.repository_owner }}' | tr '[:upper:]' '[:lower:]')
+          pages="https://$owner.github.io/${{ github.event.repository.name }}"
+          echo "PAGES_URL=$pages" >> "$GITHUB_ENV"
+
+          mkdir -p target/allure-results/history
+          for file in history.json history-trend.json duration-trend.json categories-trend.json retry-trend.json; do
+            # Baixa para um temporario e so promove no sucesso: um JSON truncado
+            # dentro de history/ quebra a geracao do relatorio inteiro.
+            temporary=$(mktemp)
+            if curl -fsSL --retry 2 "$pages/history/$file" -o "$temporary"; then
+              mv "$temporary" "target/allure-results/history/$file"
+            else
+              rm -f "$temporary"
+              echo "sem $file no relatorio anterior — esperado no primeiro run"
+            fi
+          done
+
+      - name: Identificar a execucao no historico
+        # Sem executor.json cada ponto da tendencia e um numero solto. Com ele o
+        # ponto vira link para o run que o produziu.
+        run: |
+          cat > target/allure-results/executor.json <<EOF
+          {
+            "name": "GitHub Actions",
+            "type": "github",
+            "reportName": "Swag Labs E2E",
+            "buildOrder": ${{ github.run_number }},
+            "buildName": "#${{ github.run_number }} - ${{ github.ref_name }}",
+            "buildUrl": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}",
+            "reportUrl": "$PAGES_URL"
+          }
+          EOF
+
       - name: Gerar relatorio agregado
         run: mvn -B allure:report
 

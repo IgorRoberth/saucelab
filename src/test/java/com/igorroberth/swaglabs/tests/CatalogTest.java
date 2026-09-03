@@ -11,12 +11,15 @@ import com.igorroberth.swaglabs.pages.LoginPage;
 import com.igorroberth.swaglabs.pages.ProductPage;
 import com.igorroberth.swaglabs.support.BaseTest;
 import io.qameta.allure.Allure;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("CAT — Catálogo")
 class CatalogTest extends BaseTest {
 
+    @Severity(SeverityLevel.BLOCKER)
     @Test
     @DisplayName("CAT-001: a listagem deve carregar todos os produtos do catálogo")
     void shouldListEveryProduct() {
@@ -30,6 +33,7 @@ class CatalogTest extends BaseTest {
         });
     }
 
+    @Severity(SeverityLevel.MINOR)
     @Test
     @DisplayName("CAT-002: ordenação por nome A→Z deve listar em ordem alfabética crescente")
     void shouldSortByNameAscending() {
@@ -45,6 +49,7 @@ class CatalogTest extends BaseTest {
                 assertThat(inventoryPage.itemNames()).hasText(Catalog.namesByNameAscending()));
     }
 
+    @Severity(SeverityLevel.MINOR)
     @Test
     @DisplayName("CAT-002: ordenação por nome Z→A deve listar em ordem alfabética decrescente")
     void shouldSortByNameDescending() {
@@ -56,6 +61,7 @@ class CatalogTest extends BaseTest {
                 assertThat(inventoryPage.itemNames()).hasText(Catalog.namesByNameDescending()));
     }
 
+    @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("CAT-003: ordenação por preço deve listar do mais barato ao mais caro")
     void shouldSortByPriceAscending() {
@@ -67,6 +73,7 @@ class CatalogTest extends BaseTest {
                 assertThat(inventoryPage.itemPrices()).hasText(Catalog.pricesByPriceAscending()));
     }
 
+    @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("CAT-003: ordenação por preço deve listar do mais caro ao mais barato")
     void shouldSortByPriceDescending() {
@@ -78,6 +85,7 @@ class CatalogTest extends BaseTest {
                 assertThat(inventoryPage.itemPrices()).hasText(Catalog.pricesByPriceDescending()));
     }
 
+    @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("CAT-004: o detalhe do produto deve exibir nome, preço e descrição do item")
     void shouldOpenProductDetail() {

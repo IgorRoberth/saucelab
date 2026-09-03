@@ -10,12 +10,15 @@ import com.igorroberth.swaglabs.pages.InventoryPage;
 import com.igorroberth.swaglabs.pages.LoginPage;
 import com.igorroberth.swaglabs.support.BaseTest;
 import io.qameta.allure.Allure;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("CART — Carrinho")
 class CartTest extends BaseTest {
 
+    @Severity(SeverityLevel.CRITICAL)
     @Test
     @DisplayName("CART-001: adicionar um item deve marcar o carrinho com uma unidade")
     void shouldAddSingleItem() {
@@ -27,6 +30,7 @@ class CartTest extends BaseTest {
                 assertThat(inventoryPage.cartCounter()).hasText("1"));
     }
 
+    @Severity(SeverityLevel.CRITICAL)
     @Test
     @DisplayName("CART-002: adicionar vários itens deve somar a quantidade no carrinho")
     void shouldAddMultipleItems() {
@@ -38,6 +42,7 @@ class CartTest extends BaseTest {
                 assertThat(inventoryPage.cartCounter()).hasText("2"));
     }
 
+    @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("CART-003: remover item pela listagem deve decrementar o carrinho")
     void shouldRemoveItemFromListing() {
@@ -52,6 +57,7 @@ class CartTest extends BaseTest {
                 assertThat(inventoryPage.cartCounter()).hasText("1"));
     }
 
+    @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("CART-004: remover item dentro do carrinho deve retirá-lo da lista")
     void shouldRemoveItemInsideCart() {
@@ -67,6 +73,7 @@ class CartTest extends BaseTest {
                 assertThat(cartPage.itemNames()).hasText(Catalog.namesOf(Product.BACKPACK)));
     }
 
+    @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("CART-005: o conteúdo do carrinho deve sobreviver à navegação entre páginas")
     void shouldKeepCartContentsAcrossNavigation() {

@@ -15,12 +15,15 @@ import com.igorroberth.swaglabs.pages.InventoryPage;
 import com.igorroberth.swaglabs.pages.LoginPage;
 import com.igorroberth.swaglabs.support.BaseTest;
 import io.qameta.allure.Allure;
+import io.qameta.allure.Severity;
+import io.qameta.allure.SeverityLevel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
 @DisplayName("CKO — Checkout")
 class CheckoutTest extends BaseTest {
 
+    @Severity(SeverityLevel.BLOCKER)
     @Test
     @DisplayName("CKO-001: o fluxo completo deve terminar na confirmação do pedido")
     void shouldCompleteCheckout() {
@@ -37,6 +40,7 @@ class CheckoutTest extends BaseTest {
         });
     }
 
+    @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("CKO-002: formulário vazio deve exigir o primeiro nome")
     void shouldRequireFirstName() {
@@ -48,6 +52,7 @@ class CheckoutTest extends BaseTest {
                 assertThat(informationPage.errorMessage()).hasText(ErrorMessages.FIRST_NAME_REQUIRED));
     }
 
+    @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("CKO-002: formulário sem sobrenome deve exigir o sobrenome")
     void shouldRequireLastName() {
@@ -59,6 +64,7 @@ class CheckoutTest extends BaseTest {
                 assertThat(informationPage.errorMessage()).hasText(ErrorMessages.LAST_NAME_REQUIRED));
     }
 
+    @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("CKO-002: formulário sem CEP deve exigir o código postal")
     void shouldRequirePostalCode() {
@@ -70,6 +76,7 @@ class CheckoutTest extends BaseTest {
                 assertThat(informationPage.errorMessage()).hasText(ErrorMessages.POSTAL_CODE_REQUIRED));
     }
 
+    @Severity(SeverityLevel.CRITICAL)
     @Test
     @DisplayName("CKO-003: o resumo deve somar subtotal, imposto e total da cesta")
     void shouldCalculateOrderTotals() {
@@ -84,6 +91,7 @@ class CheckoutTest extends BaseTest {
         });
     }
 
+    @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("CKO-004: cancelar no resumo deve voltar sem pedido e manter o carrinho")
     void shouldCancelWithoutLosingCart() {
@@ -97,6 +105,7 @@ class CheckoutTest extends BaseTest {
         });
     }
 
+    @Severity(SeverityLevel.TRIVIAL)
     @Test
     @DisplayName("CKO-005: checkout com carrinho vazio conclui o pedido — comportamento observado")
     void shouldDocumentCheckoutWithEmptyCart() {
