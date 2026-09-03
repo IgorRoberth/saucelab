@@ -242,8 +242,17 @@ jobs:
           }
           EOF
 
+      - name: Instalar o Allure CLI
+        run: |
+          version=$(grep -o '<allure.commandline.version>[^<]*' pom.xml | head -1 | cut -d'>' -f2)
+          npm install -g allure-commandline@"$version"
+
       - name: Gerar relatorio agregado
-        run: mvn -B allure:report
+        # O CLI direto, e nao mvn allure:report: o plugin do Maven sobrescreve o
+        # executor.json dos results pelo seu proprio ("Maven", sem buildOrder).
+        # Sem buildOrder os quatro graficos de tendencia ficam sem eixo e o Allure
+        # desenha "nao ha nada para mostrar", mesmo com o historico no lugar.
+        run: allure generate target/allure-results --clean -o target/allure-report
 
       - name: Empacotar para o Pages
         uses: actions/upload-pages-artifact@v4

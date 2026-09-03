@@ -222,7 +222,7 @@ O Allure publicado traz, além do passo a passo de cada caso, seis painéis de l
 | `minor` | Incômodo visível, sem impedir a compra | Ordenação por nome, imagem genérica sob `problem_user` |
 | `trivial` | Comportamento apenas documentado | CKO-005, o checkout que conclui com carrinho vazio |
 
-**Tendências.** Os quatro gráficos de tendência são desenhados a partir da pasta `history/` do relatório anterior — sem ela o Allure não tem memória e o painel sai vazio. No CI o `target/` nasce limpo a cada run, então o job de publicação busca esse histórico de onde ele de fato está: o próprio relatório publicado no Pages. Junto vai um `executor.json`, que transforma cada ponto do gráfico em link para o run que o produziu.
+**Tendências.** Os quatro gráficos de tendência são desenhados a partir da pasta `history/` do relatório anterior — sem ela o Allure não tem memória e o painel sai vazio. No CI o `target/` nasce limpo a cada run, então o job de publicação busca esse histórico de onde ele de fato está: o próprio relatório publicado no Pages. Junto vai um `executor.json`, que dá identidade ao run — sem ele os pontos não têm eixo e o Allure desenha "não há nada para mostrar" mesmo com o histórico presente. Por isso o relatório agregado é gerado pelo CLI do Allure, e não por `mvn allure:report`: o plugin do Maven sobrescreve esse `executor.json` pelo dele.
 
 Consequência prática: um run isolado mostra um ponto só. A tendência começa a ter leitura a partir do segundo run publicado em `main`.
 
