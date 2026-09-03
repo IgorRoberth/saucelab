@@ -243,9 +243,16 @@ jobs:
           EOF
 
       - name: Instalar o Allure CLI
+        # O zip do Maven Central, e nao o pacote npm: o npm publica uma linha de
+        # versoes propria e atrasada (parou no 2.43.0), entao a versao pinada no
+        # pom nao existe la. Este e o mesmo artefato que o allure-maven baixa.
         run: |
           version=$(grep -o '<allure.commandline.version>[^<]*' pom.xml | head -1 | cut -d'>' -f2)
-          npm install -g allure-commandline@"$version"
+          base=https://repo.maven.apache.org/maven2/io/qameta/allure/allure-commandline
+          curl -fsSL --retry 3 "$base/$version/allure-commandline-$version.zip" -o "$RUNNER_TEMP/allure.zip"
+          unzip -q "$RUNNER_TEMP/allure.zip" -d "$HOME/allure"
+          echo "$HOME/allure/allure-$version/bin" >> "$GITHUB_PATH"
+          "$HOME/allure/allure-$version/bin/allure" --version
 
       - name: Gerar relatorio agregado
         # O CLI direto, e nao mvn allure:report: o plugin do Maven sobrescreve o
