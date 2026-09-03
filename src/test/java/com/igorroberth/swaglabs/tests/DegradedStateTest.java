@@ -14,8 +14,11 @@ import com.igorroberth.swaglabs.pages.InventoryPage;
 import com.igorroberth.swaglabs.pages.LoginPage;
 import com.igorroberth.swaglabs.support.BaseTest;
 import io.qameta.allure.Allure;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -24,9 +27,12 @@ import org.junit.jupiter.api.Test;
  * confirmarem o caminho feliz: se a aplicacao for corrigida, estes testes quebram —
  * que e exatamente o sinal desejado.
  */
+@Epic("Resiliência")
+@Feature("Estados degradados")
 @DisplayName("STATE — Estados degradados")
 class DegradedStateTest extends BaseTest {
 
+    @Story("problem_user")
     @Severity(SeverityLevel.MINOR)
     @Test
     @DisplayName("STATE-001: sob problem_user o catálogo exibe imagem genérica no lugar da foto")
@@ -40,6 +46,7 @@ class DegradedStateTest extends BaseTest {
                         .hasAttribute("src", DegradedState.PLACEHOLDER_IMAGE));
     }
 
+    @Story("problem_user")
     @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("STATE-001: sob problem_user a ordenação do catálogo não reordena a listagem")
@@ -52,6 +59,7 @@ class DegradedStateTest extends BaseTest {
                 assertThat(inventoryPage.itemNames()).hasText(Catalog.namesByNameAscending()));
     }
 
+    @Story("problem_user")
     @Severity(SeverityLevel.CRITICAL)
     @Test
     @DisplayName("STATE-002: sob problem_user o checkout rejeita um formulário preenchido")
@@ -68,6 +76,7 @@ class DegradedStateTest extends BaseTest {
                 assertThat(informationPage.errorMessage()).hasText(ErrorMessages.LAST_NAME_REQUIRED));
     }
 
+    @Story("performance_glitch_user")
     @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("STATE-003: login sob performance_glitch_user deve concluir dentro do timeout")

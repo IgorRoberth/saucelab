@@ -11,14 +11,20 @@ import com.igorroberth.swaglabs.pages.LoginPage;
 import com.igorroberth.swaglabs.pages.ProductPage;
 import com.igorroberth.swaglabs.support.BaseTest;
 import io.qameta.allure.Allure;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+@Epic("Compra")
+@Feature("Catálogo")
 @DisplayName("CAT — Catálogo")
 class CatalogTest extends BaseTest {
 
+    @Story("Listagem de produtos")
     @Severity(SeverityLevel.BLOCKER)
     @Test
     @DisplayName("CAT-001: a listagem deve carregar todos os produtos do catálogo")
@@ -33,6 +39,7 @@ class CatalogTest extends BaseTest {
         });
     }
 
+    @Story("Ordenação")
     @Severity(SeverityLevel.MINOR)
     @Test
     @DisplayName("CAT-002: ordenação por nome A→Z deve listar em ordem alfabética crescente")
@@ -49,6 +56,7 @@ class CatalogTest extends BaseTest {
                 assertThat(inventoryPage.itemNames()).hasText(Catalog.namesByNameAscending()));
     }
 
+    @Story("Ordenação")
     @Severity(SeverityLevel.MINOR)
     @Test
     @DisplayName("CAT-002: ordenação por nome Z→A deve listar em ordem alfabética decrescente")
@@ -61,6 +69,7 @@ class CatalogTest extends BaseTest {
                 assertThat(inventoryPage.itemNames()).hasText(Catalog.namesByNameDescending()));
     }
 
+    @Story("Ordenação")
     @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("CAT-003: ordenação por preço deve listar do mais barato ao mais caro")
@@ -73,6 +82,7 @@ class CatalogTest extends BaseTest {
                 assertThat(inventoryPage.itemPrices()).hasText(Catalog.pricesByPriceAscending()));
     }
 
+    @Story("Ordenação")
     @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("CAT-003: ordenação por preço deve listar do mais caro ao mais barato")
@@ -85,6 +95,7 @@ class CatalogTest extends BaseTest {
                 assertThat(inventoryPage.itemPrices()).hasText(Catalog.pricesByPriceDescending()));
     }
 
+    @Story("Detalhe do produto")
     @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("CAT-004: o detalhe do produto deve exibir nome, preço e descrição do item")

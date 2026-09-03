@@ -15,14 +15,20 @@ import com.igorroberth.swaglabs.pages.InventoryPage;
 import com.igorroberth.swaglabs.pages.LoginPage;
 import com.igorroberth.swaglabs.support.BaseTest;
 import io.qameta.allure.Allure;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+@Epic("Compra")
+@Feature("Checkout")
 @DisplayName("CKO — Checkout")
 class CheckoutTest extends BaseTest {
 
+    @Story("Fluxo completo")
     @Severity(SeverityLevel.BLOCKER)
     @Test
     @DisplayName("CKO-001: o fluxo completo deve terminar na confirmação do pedido")
@@ -40,6 +46,7 @@ class CheckoutTest extends BaseTest {
         });
     }
 
+    @Story("Validação do formulário")
     @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("CKO-002: formulário vazio deve exigir o primeiro nome")
@@ -52,6 +59,7 @@ class CheckoutTest extends BaseTest {
                 assertThat(informationPage.errorMessage()).hasText(ErrorMessages.FIRST_NAME_REQUIRED));
     }
 
+    @Story("Validação do formulário")
     @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("CKO-002: formulário sem sobrenome deve exigir o sobrenome")
@@ -64,6 +72,7 @@ class CheckoutTest extends BaseTest {
                 assertThat(informationPage.errorMessage()).hasText(ErrorMessages.LAST_NAME_REQUIRED));
     }
 
+    @Story("Validação do formulário")
     @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("CKO-002: formulário sem CEP deve exigir o código postal")
@@ -76,6 +85,7 @@ class CheckoutTest extends BaseTest {
                 assertThat(informationPage.errorMessage()).hasText(ErrorMessages.POSTAL_CODE_REQUIRED));
     }
 
+    @Story("Cálculo do pedido")
     @Severity(SeverityLevel.CRITICAL)
     @Test
     @DisplayName("CKO-003: o resumo deve somar subtotal, imposto e total da cesta")
@@ -91,6 +101,7 @@ class CheckoutTest extends BaseTest {
         });
     }
 
+    @Story("Cancelamento")
     @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("CKO-004: cancelar no resumo deve voltar sem pedido e manter o carrinho")
@@ -105,6 +116,7 @@ class CheckoutTest extends BaseTest {
         });
     }
 
+    @Story("Comportamento documentado")
     @Severity(SeverityLevel.TRIVIAL)
     @Test
     @DisplayName("CKO-005: checkout com carrinho vazio conclui o pedido — comportamento observado")

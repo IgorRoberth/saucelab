@@ -8,14 +8,20 @@ import com.igorroberth.swaglabs.pages.InventoryPage;
 import com.igorroberth.swaglabs.pages.LoginPage;
 import com.igorroberth.swaglabs.support.BaseTest;
 import io.qameta.allure.Allure;
+import io.qameta.allure.Epic;
+import io.qameta.allure.Feature;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
+import io.qameta.allure.Story;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+@Epic("Acesso")
+@Feature("Autenticação")
 @DisplayName("AUTH — Autenticação")
 class AuthenticationTest extends BaseTest {
 
+    @Story("Login")
     @Severity(SeverityLevel.BLOCKER)
     @Test
     @DisplayName("AUTH-001: usuário válido deve acessar o inventário")
@@ -28,6 +34,7 @@ class AuthenticationTest extends BaseTest {
                 assertThat(inventoryPage.container()).isVisible());
     }
 
+    @Story("Credenciais inválidas")
     @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("AUTH-002: senha incorreta deve manter o usuário na tela de login")
@@ -40,6 +47,7 @@ class AuthenticationTest extends BaseTest {
                 assertThat(loginPage.errorMessage()).hasText(ErrorMessages.INVALID_CREDENTIALS));
     }
 
+    @Story("Credenciais inválidas")
     @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("AUTH-003: envio com campos vazios deve exigir o usuário")
@@ -52,6 +60,7 @@ class AuthenticationTest extends BaseTest {
                 assertThat(loginPage.errorMessage()).hasText(ErrorMessages.USERNAME_REQUIRED));
     }
 
+    @Story("Usuário bloqueado")
     @Severity(SeverityLevel.CRITICAL)
     @Test
     @DisplayName("AUTH-004: usuário bloqueado não deve acessar o inventário")
@@ -64,6 +73,7 @@ class AuthenticationTest extends BaseTest {
                 assertThat(loginPage.errorMessage()).hasText(ErrorMessages.LOCKED_OUT));
     }
 
+    @Story("Logout")
     @Severity(SeverityLevel.NORMAL)
     @Test
     @DisplayName("AUTH-005: logout pelo menu lateral deve devolver o usuário ao login")
@@ -76,6 +86,7 @@ class AuthenticationTest extends BaseTest {
                 assertThat(loginPage.container()).isVisible());
     }
 
+    @Story("Proteção de sessão")
     @Severity(SeverityLevel.CRITICAL)
     @Test
     @DisplayName("AUTH-006: acesso direto ao inventário sem sessão deve ser bloqueado")

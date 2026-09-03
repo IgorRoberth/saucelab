@@ -207,7 +207,7 @@ O relatório é um site estático com sete telas no menu lateral. Cada uma respo
 | **Visão geral** | O painel de entrada: resultado do run, tendência, categorias de falha, ambiente e executor |
 | **Categorias** | Agrupa as falhas por tipo de defeito, não por teste — responde "que espécie de problema é este?" |
 | **Suítes** | A árvore de execução como ela é: classe → método. É por aqui que se acha um caso pelo ID (`AUTH-003`) |
-| **Comportamentos** | Os mesmos testes agrupados por domínio de negócio, quando anotados com `@Epic`/`@Feature`/`@Story` |
+| **Comportamentos** | Os mesmos testes agrupados por domínio de negócio: épico → funcionalidade → história |
 | **Pacotes** | A mesma árvore, organizada pelo pacote Java — útil para quem navega o código junto |
 | **Gráficos** | Todos os gráficos numa tela só: status, severidade, duração e as quatro tendências |
 | **Linha do tempo** | Quando cada teste rodou e em qual worker — mostra onde o paralelismo está ocioso ou desbalanceado |
@@ -237,6 +237,18 @@ O relatório é um site estático com sete telas no menu lateral. Cada uma respo
 #### Dentro de um caso de teste
 
 Abrir um teste mostra o passo a passo (`@Step` e `Allure.step`), com screenshot anexado a cada passo, além do parâmetro `browser`, das tentativas de retry e do histórico do caso nos runs anteriores. Num teste que falhou, entram também o vídeo e o `trace.zip`.
+
+#### Comportamentos
+
+A árvore de negócio é declarada com `@Epic`, `@Feature` e `@Story`, e existe para responder a pergunta que a árvore de classes não responde: *que parte do produto está quebrada?*
+
+| Épico | Funcionalidade | Histórias |
+|---|---|---|
+| Acesso | Autenticação | Login, Credenciais inválidas, Usuário bloqueado, Logout, Proteção de sessão |
+| Compra | Catálogo | Listagem de produtos, Ordenação, Detalhe do produto |
+| Compra | Carrinho | Adicionar item, Remover item, Persistência do carrinho |
+| Compra | Checkout | Fluxo completo, Validação do formulário, Cálculo do pedido, Cancelamento, Comportamento documentado |
+| Resiliência | Estados degradados | `problem_user`, `performance_glitch_user` |
 
 #### Severidade
 
