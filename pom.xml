@@ -33,7 +33,7 @@
         <!-- O allure-commandline segue uma linha de versao propria: nao existe zip
              2.35.4 no Central. Gerar o HTML exige uma versao publicada do CLI. -->
         <allure.commandline.version>2.46.0</allure.commandline.version>
-        <aspectj.version>1.9.25</aspectj.version>
+        <aspectj.version>1.9.25.1</aspectj.version>
 
         <compiler.plugin.version>3.15.0</compiler.plugin.version>
         <surefire.plugin.version>3.5.6</surefire.plugin.version>
