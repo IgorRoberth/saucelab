@@ -201,7 +201,7 @@ jobs:
           cache: maven
 
       - name: Baixar os resultados dos tres browsers
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           pattern: intermediario-nao-use-*
           path: target/allure-results
