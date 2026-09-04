@@ -150,7 +150,7 @@ jobs:
         # que o job de publicacao precisa dos tres browsers para agregar. Quem
         # quer evidencia legivel usa evidencia-<browser> ou o relatorio no Pages.
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: intermediario-nao-use-${{ matrix.browser }}
           path: target/allure-results/
@@ -161,7 +161,7 @@ jobs:
         # Sempre: num run verde a evidencia e o que prova a execucao, e sem isto
         # o allure-results morre com o runner.
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: evidencia-${{ matrix.browser }}
           path: |
