@@ -6,8 +6,10 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    # Regressao semanal contra o ambiente publico — segunda, 06:00 UTC.
-    - cron: '0 6 * * 1'
+    # Regressao contra o ambiente publico — segunda, quarta e sexta, 06:00 UTC.
+    # Tres medicoes por semana, nao carga: a secao 10 do .cursorrules proibe carga
+    # contra o alvo de terceiro, e um run por dia util alternado nao chega perto disso.
+    - cron: '0 6 * * 1,3,5'
   workflow_dispatch:
     inputs:
       browser:
@@ -21,9 +23,11 @@ on:
         default: ''
 
 # Um push novo cancela a execucao anterior do mesmo ref: feedback rapido vale
-# mais que terminar um run ja obsoleto.
+# mais que terminar um run ja obsoleto. O event_name entra no grupo porque
+# execucao agendada tambem roda em main: sem ele um push cancelaria o run das
+# 06:00 no meio, e com tres agendamentos por semana isso deixa de ser raro.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
   cancel-in-progress: true
 
 permissions:
