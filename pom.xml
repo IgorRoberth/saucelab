@@ -35,7 +35,7 @@
         <allure.commandline.version>2.46.0</allure.commandline.version>
         <aspectj.version>1.9.25</aspectj.version>
 
-        <compiler.plugin.version>3.15.0</compiler.plugin.version>
+        <compiler.plugin.version>3.16.0</compiler.plugin.version>
         <surefire.plugin.version>3.5.6</surefire.plugin.version>
         <allure.maven.version>3.0.3</allure.maven.version>
         <exec.plugin.version>3.6.3</exec.plugin.version>
