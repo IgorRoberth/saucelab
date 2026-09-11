@@ -307,10 +307,7 @@ jobs:
     # ignorar — que e como um alerta de qualidade morre.
     # always(): um run vermelho e exatamente quando o aviso mais importa, e sem
     # isto o job seria pulado justamente nesse caso.
-    # TEMPORARIO — workflow_dispatch liberado so para validar o aviso sem esperar
-    # o proximo run agendado. Reverter para `github.event_name == 'schedule'`
-    # assim que o teste passar.
-    if: always() && contains(fromJSON('["schedule","workflow_dispatch"]'), github.event_name)
+    if: always() && github.event_name == 'schedule'
     runs-on: ubuntu-latest
     timeout-minutes: 5
 
