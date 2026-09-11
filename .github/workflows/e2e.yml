@@ -180,6 +180,11 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
+    # O job de aviso precisa do endereco do relatorio publicado, e page_url so
+    # existe dentro deste job: sem expor como saida, o comentario sairia sem link.
+    outputs:
+      url: ${{ steps.deploy.outputs.page_url }}
+
     permissions:
       contents: read
       pages: write
@@ -293,3 +298,121 @@ jobs:
         uses: actions/deploy-pages@v5
         with:
           artifact_name: github-pages-${{ github.run_attempt }}
+
+  notificar:
+    name: Avisar o resultado
+    needs: [browsers, test, report]
+    # Somente a regressao agendada. Push e PR ja mostram o veredito na propria
+    # interface do GitHub, e um aviso por commit vira ruido que se aprende a
+    # ignorar — que e como um alerta de qualidade morre.
+    # always(): um run vermelho e exatamente quando o aviso mais importa, e sem
+    # isto o job seria pulado justamente nesse caso.
+    if: always() && github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    permissions:
+      # Unica permissao necessaria, e nenhum segredo: o GITHUB_TOKEN efemero do
+      # proprio run comenta na issue. Credencial de SMTP versionada violaria a
+      # secao 10 do .cursorrules, e senha de app exigiria rotacao manual.
+      issues: write
+
+    steps:
+      - name: Baixar a evidencia dos browsers
+        # continue-on-error: se a suite morreu antes de anexar qualquer coisa, o
+        # aviso ainda precisa sair — sem placar, mas com o veredito e o link.
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          pattern: evidencia-*
+          path: evidencia
+
+      - name: Montar o comentario
+        env:
+          RESULTADO: ${{ needs.test.result }}
+          RELATORIO: ${{ needs.report.outputs.url }}
+        run: |
+          case "$RESULTADO" in
+            success)   veredito='Regressao verde' ;;
+            failure)   veredito='Regressao VERMELHA' ;;
+            cancelled) veredito='Regressao cancelada' ;;
+            *)         veredito="Regressao inconclusiva ($RESULTADO)" ;;
+          esac
+
+          run_url="${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+
+          {
+            echo "## $veredito"
+            echo ""
+            echo "Execucao agendada de $(date -u '+%d/%m/%Y') — run [#${{ github.run_number }}]($run_url), commit \`$(echo '${{ github.sha }}' | cut -c1-7)\`."
+            echo ""
+            echo "| Browser | Testes | Falhas | Erros | Ignorados |"
+            echo "|---|--:|--:|--:|--:|"
+          } > comentario.md
+
+          # Um numero ausente no relatorio do Surefire nao pode abortar a soma:
+          # sem o ${n:-0} a expansao aritmetica quebra e o aviso inteiro se perde.
+          somar() {
+            local texto="$1" campo="$2" n
+            n=$(echo "$texto" | sed -n "s/.*$campo: \([0-9]*\).*/\1/p")
+            echo "${n:-0}"
+          }
+
+          shopt -s nullglob
+          linhas=0
+          for pasta in evidencia/evidencia-*/; do
+            linhas=$((linhas + 1))
+            browser=$(basename "$pasta")
+            browser=${browser#evidencia-}
+
+            relatorios=("$pasta"surefire-reports/*.txt)
+            if [ ${#relatorios[@]} -eq 0 ]; then
+              echo "| $browser | _sem relatorio_ | | | |" >> comentario.md
+              continue
+            fi
+
+            total=0; falhas=0; erros=0; ignorados=0
+            for relatorio in "${relatorios[@]}"; do
+              stats=$(grep -m1 '^Tests run:' "$relatorio") || continue
+              total=$((total + $(somar "$stats" 'Tests run')))
+              falhas=$((falhas + $(somar "$stats" 'Failures')))
+              erros=$((erros + $(somar "$stats" 'Errors')))
+              ignorados=$((ignorados + $(somar "$stats" 'Skipped')))
+            done
+            echo "| $browser | $total | $falhas | $erros | $ignorados |" >> comentario.md
+          done
+
+          # Tabela sem nenhuma linha renderiza como cabecalho solto: um contador
+          # explicito e mais honesto que deixar o leitor adivinhar o que houve.
+          if [ "$linhas" -eq 0 ]; then
+            echo "| _nenhuma evidencia anexada_ | | | | |" >> comentario.md
+          fi
+
+          {
+            echo ""
+            if [ -n "$RELATORIO" ]; then
+              echo "Relatorio Allure: $RELATORIO"
+            else
+              echo "Relatorio Allure nao publicado neste run — ver o job \`Publicar relatorio\`."
+            fi
+          } >> comentario.md
+
+      - name: Comentar na issue de acompanhamento
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITULO: Regressao agendada — historico de execucoes
+        run: |
+          # Uma issue permanente, nao uma por run: o valor esta na serie historica
+          # num lugar so, e abrir issue a cada execucao entulharia o backlog com
+          # tres itens por semana.
+          numero=$(gh issue list --state open --limit 100 --json number,title \
+            --jq "[.[] | select(.title == \"$TITULO\")][0].number // empty")
+
+          if [ -z "$numero" ]; then
+            url=$(gh issue create --title "$TITULO" \
+              --body 'Issue de acompanhamento da regressao agendada (segunda, quarta e sexta). Cada execucao vira um comentario aqui. Fechar esta issue interrompe o historico — o proximo run abriria outra.')
+            numero=${url##*/}
+          fi
+
+          gh issue comment "$numero" --body-file comentario.md
+          echo "Aviso publicado na issue #$numero." >> "$GITHUB_STEP_SUMMARY"
