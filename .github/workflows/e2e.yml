@@ -403,6 +403,10 @@ jobs:
       - name: Comentar na issue de acompanhamento
         env:
           GH_TOKEN: ${{ github.token }}
+          # Sem isto o gh tenta descobrir o repositorio pelo remote do git local
+          # e falha com "not a git repository": este job nao faz checkout, de
+          # proposito — clonar o repo inteiro so para comentar seria desperdicio.
+          GH_REPO: ${{ github.repository }}
           TITULO: Regressao agendada — historico de execucoes
         run: |
           # Uma issue permanente, nao uma por run: o valor esta na serie historica
