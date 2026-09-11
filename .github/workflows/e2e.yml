@@ -398,6 +398,11 @@ jobs:
             else
               echo "Relatorio Allure nao publicado neste run — ver o job \`Publicar relatorio\`."
             fi
+            echo ""
+            # Mencao direta, e nao inscricao na issue: quem comenta e o bot, entao
+            # a inscricao automatica nao pega o dono do repositorio. Mencao notifica
+            # em qualquer nivel de watch, inclusive "Participating and @mentions".
+            echo "cc @${{ github.repository_owner }}"
           } >> comentario.md
 
       - name: Comentar na issue de acompanhamento
